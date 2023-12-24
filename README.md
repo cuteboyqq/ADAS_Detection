@@ -1,7 +1,6 @@
 # ADAS_Detection
 
-#### VLA (Vanish Line Area)
-
-#### DCA (Drivable Center Area)
-
-#### VPA (Vanish Point Area)
+  Parsing the BDD100K dataset, output the ADAS detection label
+    1. Vanish Line Area 
+    2. Drivable Center Area
+    3. Vanish Point Area
