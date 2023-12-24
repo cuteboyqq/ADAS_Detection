@@ -16,8 +16,8 @@ if __name__=="__main__":
     # #bk.Add_Vanish_Line_Area_Yolo_Txt_Labels()
     # # bk.Get_DCA_Yolo_Txt_Labels()
     # vla.Add_Vanish_Line_Area_Yolo_Txt_Labels()
-    Get_VLA = True
-    Get_VPA = False
+    Get_VLA = False
+    Get_VPA = True
     Get_DCA = False
     if Get_VLA:
         args_vla = get_VLA_args()

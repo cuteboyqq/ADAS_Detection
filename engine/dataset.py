@@ -253,8 +253,51 @@ class BaseDataset:
             min = int(img_h/2.0)
         return (min,min_x,min_w,min_h)
         #return min,min_x,min_w,min_h
-
     
+    ##============== VLA (Vanish Point Area)=================================
+    def Get_Vanish_Area(self):
+        return NotImplemented
 
+    def Add_Vanish_Line_Area_Yolo_Txt_Labels(self):
+        return NotImplemented
+
+    def Add_VLA_Yolo_Txt_Label(self,min_y,detection_path,h,w,im_path):
+        return NotImplemented
+
+    def split_Image(self,im_path,drivable_min_y):
+        return NotImplemented
     
-   
+    ##============ DCA (Drivable Center Area)==================================
+    def Get_DCA_Yolo_Txt_Labels(self, version=1):
+        return NotImplemented
+
+    def Add_DCA_Yolo_Txt_Label(self,xywh,detection_path,h,w,im_path):
+        return NotImplemented
+
+    def Get_DCA_XYWH(self,im_path,return_type=1):
+        return NotImplemented
+
+    ## =========== VPA (Vansih Point Area)==================================
+    def Get_VPA_Yolo_Txt_Labels(self, version=1):
+        return NotImplemented
+    
+    def Get_VPA(self,im_path,Up,Down):
+        return NotImplemented
+    
+    def Get_VP(self,p1,p2,p3,p4,cv_im):
+        return NotImplemented
+
+    def Get_Vehicle_In_Middle_Image(self,detection_path,im,Left_X,Right_X,L_X2,R_X2,Th=200):
+        return NotImplemented
+
+    def Add_VPA_Yolo_Txt_Label(self,xywh,detection_path,h,w,im_path):
+        return NotImplemented
+    
+    def Get_DCA_XYWH(self,im_path,return_type=1):
+        return NotImplemented
+
+    def Get_VPA_XYWH(self,im_path,return_type=1):
+        return NotImplemented
+    
+    def Get_VPA_XYWH_Ver2(self,im_path,return_type=1): 
+        return NotImplemented
