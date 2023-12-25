@@ -155,7 +155,10 @@ class VPA(BaseDataset):
             # print(f"h:{h}, w:{w}")
         if not os.path.exists(detection_path):
             print(f"{detection_path} is not exists !! PASS~~~")
-            return (None,None,None,None),None,None
+            if return_type == 1:
+                return (None,None,None,None),None,None
+            elif return_type == 2:
+                return (None,None,None,None),(None,None,None,None,None)
 
         min_final,index = self.Get_Min_y_In_Drivable_Area(drivable_path)    
         VL = self.Find_Min_Y_Among_All_Vehicle_Bounding_Boxes(min_final,detection_path,h,w,type=2) #min_final_2
@@ -313,6 +316,8 @@ class VPA(BaseDataset):
                 cv2.imshow("drivable image",im_dri_cm)
                 cv2.imshow("image",im)
                 cv2.waitKey()
+        else:
+            return (None,None,None,None),(None,None,None,None,None) 
         if return_type == 1:
             return (Middle_X,Middle_Y,DCA_W,DCA_H),h,w
         elif return_type == 2:
