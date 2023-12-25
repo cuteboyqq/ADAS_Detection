@@ -3,7 +3,19 @@ import os
 import shutil
 import cv2
 
-
+## =======Set parameters for all get_XXX_args()==================================================
+SHOW_IMAGE = False
+SAVE_IMAGE = False
+DATA_NUM = 70000
+DATA_TYPE = "train"
+IMG_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.9/images/100k/train"
+SAVE_TXT_DIR = "/home/ali/Projects/datasets/BDD100K_Train_VPA_label_Txt_2023-12-25-Ver2"
+DATA_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.9"
+VLA_LABEL = 12
+DCA_LABEL = 13
+VPA_LABEL = 14
+DUA_LABEL = 15
+## ===============================================================================================
 '''
     VLA parameters
 '''
@@ -11,27 +23,27 @@ def get_VLA_args():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('-imdir','--im-dir',help='image directory',\
-                        default="/home/ali/Projects/datasets/bdd100k_data_0.9/images/100k/train")
+                        default=IMG_DIR)
     parser.add_argument('-savedir','--save-dir',help='save image directory',\
                         default="/home/ali/Projects/datasets/BDD100K_Val_VLA_DCA_VPA_label_Txt_h80_2023-11-24")
     parser.add_argument('-datadir','--data-dir',help='dataset directory',\
-                        default="/home/ali/Projects/datasets/bdd100k_data_0.9")
+                        default=DATA_DIR)
 
 
     parser.add_argument('-savetxtdir','--save-txtdir',help='save txt directory',\
-                        default="/home/ali/Projects/datasets/BDD100K_Train_VPA_label_Txt_2023-12-25-Ver2")
-    parser.add_argument('-vlalabel','--vla-label',type=int,help='VLA label',default=12)
-    parser.add_argument('-dcalabel','--dca-label',type=int,help='DCA label',default=13)
-    parser.add_argument('-vpalabel','--vpa-label',type=int,help='DCA label',default=14)
-    parser.add_argument('-vpamlabel','--vpam-label',type=int,help='VPA middle label',default=15)
-    parser.add_argument('-saveimg','--save-img',type=bool,help='save images',default=True)
+                        default=SAVE_TXT_DIR)
+    parser.add_argument('-vlalabel','--vla-label',type=int,help='VLA label',default=VLA_LABEL)
+    parser.add_argument('-dcalabel','--dca-label',type=int,help='DCA label',default=DCA_LABEL)
+    parser.add_argument('-vpalabel','--vpa-label',type=int,help='DCA label',default=VPA_LABEL)
+    parser.add_argument('-vpamlabel','--vpam-label',type=int,help='VPA middle label',default=DUA_LABEL)
+    parser.add_argument('-saveimg','--save-img',type=bool,help='save images',default=SAVE_IMAGE)
 
-    parser.add_argument('-datatype','--data-type',help='data type',default="train")
-    parser.add_argument('-datanum','--data-num',type=int,help='number of images to crop',default=1000)
+    parser.add_argument('-datatype','--data-type',help='data type',default=DATA_TYPE)
+    parser.add_argument('-datanum','--data-num',type=int,help='number of images to crop',default=DATA_NUM)
 
 
 
-    parser.add_argument('-showim','--show-im',type=bool,help='show images',default=True)
+    parser.add_argument('-showim','--show-im',type=bool,help='show images',default=SHOW_IMAGE)
     parser.add_argument('-showimcrop','--show-imcrop',type=bool,help='show crop images',default=True)
     parser.add_argument('-showvanishline','--show-vanishline',type=bool,help='show vanish line in image',default=False)
     parser.add_argument('-saveimcrop','--save-imcrop',type=bool,help='save  crop images',default=True)
@@ -53,27 +65,27 @@ def get_DCA_args():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('-imdir','--im-dir',help='image directory',\
-                        default="/home/ali/Projects/datasets/bdd100k_data_0.9/images/100k/train")
+                        default=IMG_DIR)
     parser.add_argument('-savedir','--save-dir',help='save image directory',\
                         default="/home/ali/Projects/datasets/BDD100K_Val_VLA_DCA_VPA_label_Txt_h80_2023-11-24")
     parser.add_argument('-datadir','--data-dir',help='dataset directory',\
-                        default="/home/ali/Projects/datasets/bdd100k_data_0.9")
+                        default=DATA_DIR)
 
 
     parser.add_argument('-savetxtdir','--save-txtdir',help='save txt directory',\
-                        default="/home/ali/Projects/datasets/BDD100K_Train_DCA_label_Txt_2023-12-25-Ver2")
-    parser.add_argument('-vlalabel','--vla-label',type=int,help='VLA label',default=12)
-    parser.add_argument('-dcalabel','--dca-label',type=int,help='DCA label',default=13)
-    parser.add_argument('-vpalabel','--vpa-label',type=int,help='DCA label',default=14)
-    parser.add_argument('-vpamlabel','--vpam-label',type=int,help='VPA middle label',default=15)
-    parser.add_argument('-saveimg','--save-img',type=bool,help='save images',default=True)
+                        default=SAVE_TXT_DIR)
+    parser.add_argument('-vlalabel','--vla-label',type=int,help='VLA label',default=VLA_LABEL)
+    parser.add_argument('-dcalabel','--dca-label',type=int,help='DCA label',default=DCA_LABEL)
+    parser.add_argument('-vpalabel','--vpa-label',type=int,help='DCA label',default=VPA_LABEL)
+    parser.add_argument('-vpamlabel','--vpam-label',type=int,help='VPA middle label',default=DUA_LABEL)
+    parser.add_argument('-saveimg','--save-img',type=bool,help='save images',default=SAVE_IMAGE)
 
-    parser.add_argument('-datatype','--data-type',help='data type',default="train")
-    parser.add_argument('-datanum','--data-num',type=int,help='number of images to crop',default=1000)
+    parser.add_argument('-datatype','--data-type',help='data type',default=DATA_TYPE)
+    parser.add_argument('-datanum','--data-num',type=int,help='number of images to crop',default=DATA_NUM)
 
 
 
-    parser.add_argument('-showim','--show-im',type=bool,help='show images',default=True)
+    parser.add_argument('-showim','--show-im',type=bool,help='show images',default=SHOW_IMAGE)
     parser.add_argument('-showimcrop','--show-imcrop',type=bool,help='show crop images',default=True)
     parser.add_argument('-showvanishline','--show-vanishline',type=bool,help='show vanish line in image',default=False)
     parser.add_argument('-saveimcrop','--save-imcrop',type=bool,help='save  crop images',default=True)
@@ -95,27 +107,27 @@ def get_VPA_args():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('-imdir','--im-dir',help='image directory',\
-                        default="/home/ali/Projects/datasets/bdd100k_data_0.9/images/100k/train")
+                        default=IMG_DIR)
     parser.add_argument('-savedir','--save-dir',help='save image directory',\
                         default="/home/ali/Projects/datasets/BDD100K_Val_VLA_DCA_VPA_label_Txt_h80_2023-11-24")
     parser.add_argument('-datadir','--data-dir',help='dataset directory',\
-                        default="/home/ali/Projects/datasets/bdd100k_data_0.9")
+                        default=DATA_DIR)
 
 
     parser.add_argument('-savetxtdir','--save-txtdir',help='save txt directory',\
-                        default="/home/ali/Projects/datasets/BDD100K_Train_VPA_label_Txt_2023-12-25-Ver2")
-    parser.add_argument('-vlalabel','--vla-label',type=int,help='VLA label',default=12)
-    parser.add_argument('-dcalabel','--dca-label',type=int,help='DCA label',default=13)
-    parser.add_argument('-vpalabel','--vpa-label',type=int,help='DCA label',default=14)
-    parser.add_argument('-vpamlabel','--vpam-label',type=int,help='VPA middle label',default=15)
-    parser.add_argument('-saveimg','--save-img',type=bool,help='save images',default=False)
+                        default=SAVE_TXT_DIR)
+    parser.add_argument('-vlalabel','--vla-label',type=int,help='VLA label',default=VLA_LABEL)
+    parser.add_argument('-dcalabel','--dca-label',type=int,help='DCA label',default=DCA_LABEL)
+    parser.add_argument('-vpalabel','--vpa-label',type=int,help='DCA label',default=VPA_LABEL)
+    parser.add_argument('-vpamlabel','--vpam-label',type=int,help='VPA middle label',default=DUA_LABEL)
+    parser.add_argument('-saveimg','--save-img',type=bool,help='save images',default=SAVE_IMAGE)
 
-    parser.add_argument('-datatype','--data-type',help='data type',default="train")
-    parser.add_argument('-datanum','--data-num',type=int,help='number of images to crop',default=70000)
+    parser.add_argument('-datatype','--data-type',help='data type',default=DATA_TYPE)
+    parser.add_argument('-datanum','--data-num',type=int,help='number of images to crop',default=DATA_NUM)
 
 
 
-    parser.add_argument('-showim','--show-im',type=bool,help='show images',default=False)
+    parser.add_argument('-showim','--show-im',type=bool,help='show images',default=SHOW_IMAGE)
     parser.add_argument('-showimcrop','--show-imcrop',type=bool,help='show crop images',default=True)
     parser.add_argument('-showvanishline','--show-vanishline',type=bool,help='show vanish line in image',default=False)
     parser.add_argument('-saveimcrop','--save-imcrop',type=bool,help='save  crop images',default=True)
@@ -136,27 +148,27 @@ def get_DUA_args():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('-imdir','--im-dir',help='image directory',\
-                        default="/home/ali/Projects/datasets/bdd100k_data_0.9/images/100k/train")
+                        default=r"C:/datasets/bdd100k_data_0.9_zip/images/100k/train")
     parser.add_argument('-savedir','--save-dir',help='save image directory',\
                         default="/home/ali/Projects/datasets/BDD100K_Val_VLA_DCA_VPA_label_Txt_h80_2023-11-24")
     parser.add_argument('-datadir','--data-dir',help='dataset directory',\
-                        default="/home/ali/Projects/datasets/bdd100k_data_0.9")
+                        default=r"C:/datasets/bdd100k_data_0.9_zip")
 
 
     parser.add_argument('-savetxtdir','--save-txtdir',help='save txt directory',\
-                        default="/home/ali/Projects/datasets/BDD100K_Train_VPA_label_Txt_2023-12-25-Ver2")
+                        default="C:/datasets/BDD100K_Train_DUA_label_Txt_2023-12-25")
     parser.add_argument('-vlalabel','--vla-label',type=int,help='VLA label',default=12)
     parser.add_argument('-dcalabel','--dca-label',type=int,help='DCA label',default=13)
     parser.add_argument('-vpalabel','--vpa-label',type=int,help='DCA label',default=14)
     parser.add_argument('-vpamlabel','--vpam-label',type=int,help='VPA middle label',default=15)
-    parser.add_argument('-saveimg','--save-img',type=bool,help='save images',default=True)
+    parser.add_argument('-saveimg','--save-img',type=bool,help='save images',default=SAVE_IMAGE)
 
-    parser.add_argument('-datatype','--data-type',help='data type',default="train")
-    parser.add_argument('-datanum','--data-num',type=int,help='number of images to crop',default=1000)
+    parser.add_argument('-datatype','--data-type',help='data type',default=DATA_TYPE)
+    parser.add_argument('-datanum','--data-num',type=int,help='number of images to crop',default=DATA_NUM)
 
 
 
-    parser.add_argument('-showim','--show-im',type=bool,help='show images',default=True)
+    parser.add_argument('-showim','--show-im',type=bool,help='show images',default=SHOW_IMAGE)
     parser.add_argument('-showimcrop','--show-imcrop',type=bool,help='show crop images',default=True)
     parser.add_argument('-showvanishline','--show-vanishline',type=bool,help='show vanish line in image',default=False)
     parser.add_argument('-saveimcrop','--save-imcrop',type=bool,help='save  crop images',default=True)
