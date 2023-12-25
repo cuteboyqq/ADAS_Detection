@@ -5,17 +5,15 @@ import cv2
 from engine.dataset import BaseDataset
 
 
-class VPA(BaseDataset):
+class LA(BaseDataset):
 
-   
-
-    def Get_VPA_Yolo_Txt_Labels(self, version=1):
+    def Get_LA_Yolo_Txt_Labels(self, version=1):
         '''
             func: 
-                Get Vanish Point Area
+                Get Line Area
             Purpose : 
                 parsing the images in given directory, 
-                find the Vanish Point Area (VPA: Vanish Point Area)
+                find the Line Area (LA: Line Area)
                 and add bounding box information x,y,w,h 
                 into label.txt of yolo format.
             input :
@@ -23,7 +21,7 @@ class VPA(BaseDataset):
                 self.dataset_dir : the dataset directory
                 self.save_dir : save crop image directory
             output:
-                the label.txt with VPA (VPA: Vanish Point Area) bounding box
+                the label.txt with LA (LA: Line Area) bounding box
         '''
         im_path_list = glob.glob(os.path.join(self.im_dir,"*.jpg"))
 
@@ -52,54 +50,89 @@ class VPA(BaseDataset):
                 success = 1
                 continue
             Down = self.Get_DCA_XYWH(im_path_list[i],return_type=2) #(Left_X,Right_X,Search_line_H,min_final_2)
-            Up = self.Get_VPA_XYWH(im_path_list[i],return_type=2) #(Left_X,Right_X,Search_line_H,VL_X,VL_Y)
-            if Down[0] is not None and Down[1] is not None and Up[0] is not None and Up[1] is not None \
+            #(Left_X,Right_X,Search_line_H,VL_X,VL_Y,Left_M_X,Right_M_X,Search_M_line_H)
+            
+            Up_Mid = self.Get_Two_VPA_XYWH(im_path_list[i],return_type=2) 
+            (Left_X,Right_X,Search_line_H,VL_X,VL_Y,Left_M_X,Right_M_X,Search_M_line_H) = Up_Mid
+            # print(f"Left_X={Left_X},Right_X={Right_X},Search_line_H={Search_line_H},VL_X={VL_X},VL_Y={VL_Y}")
+            # print(f"Left_M_X={Left_M_X},Right_M_X={Right_M_X},Search_M_line_H={Search_M_line_H}")
+            
+            if Down[0] is not None and Down[1] is not None and Left_X is not None and Right_X is not None \
                 and isinstance(Down[0],int)\
                 and isinstance(Down[1],int)\
-                and isinstance(Up[0],int)\
-                and isinstance(Up[1],int):
-                VP_x,VP_y,New_W,New_H = self.Get_VPA(im_path_list[i],Up,Down)
+                and isinstance(Left_X,int)\
+                and isinstance(Right_X,int):
+                VP_x,VP_y,New_W,New_H = self.Get_VPA(im_path_list[i],Up_Mid,Down,use_vehicle_info=False)
             # else:
             #     print("None value, return !!")
             #     continue
-            # elif version==4:
-            #     xywh,h,w = self.Get_VPA_XYWH_Ver2(im_path_list[i],return_type=1)
-            # else:
-            #     print("No this version , only support verson=0 : DCA include main lane drivable area, \
-            #           version 1 : DCA include vanish point, sky and drivable area")
-            #     return NotImplemented
-            # if version == 1 or version == 2:
-            #     x,y = xywh[0],xywh[1]
-            # elif version == 3:
+          
             x, y  = VP_x, VP_y
             xywh = (VP_x,VP_y,New_W,New_H)
             
-            success = self.Add_VPA_Yolo_Txt_Label(xywh,detection_path,h,w,im_path_list[i])
+            if Up_Mid[5] is not None:
+                x_m = int((Up_Mid[5] + Up_Mid[6])/2.0)
+                y_m = int(Up_Mid[7]/2.0)
+                w_m = int(Up_Mid[6] - Up_Mid[5])
+                h_m = int(Up_Mid[7])
+                xywh_m = (x_m,y_m,w_m,h_m)
+                # print(f"x_m={xywh_m[0]}, y_m={xywh_m[1]}, w_m={xywh_m[2]}, h_m={xywh_m[3]}")
+            else:
+                xywh_m = (None,None,None,None)
+                # print(f"x_m={xywh_m[0]}, y_m={xywh_m[1]}, w_m={xywh_m[2]}, h_m={xywh_m[3]}")
+
+            success = self.Add_Two_VPA_Yolo_Txt_Label(xywh,xywh_m,detection_path,h,w,im_path_list[i],add_VPA=False,add_VMA=True)
 
     
 
-    def Add_VPA_Yolo_Txt_Label(self,xywh,detection_path,h,w,im_path):
+    def Add_Two_VPA_Yolo_Txt_Label(self,xywh,xywh_m,detection_path,h,w,im_path, add_VPA=False,add_VMA=True):
         success = 0
+        im_w = w
+        im_h = h
         xywh_not_None = True
-        DCA_lxywh = None
+        VPA_lxywh = None
+        VPA_lxywh_M = None
         if xywh[0] is not None and xywh[1] is not None:
             xywh_not_None = True
         else:
             xywh_not_None = False
+        
+        xywh_m_not_None = True
+        if xywh_m[0] is not None and xywh_m[1] is not None:
+            xywh_m_not_None = True
+        else:
+            xywh_m_not_None = False
         # print(f"xywh[0]:{xywh[0]},xywh[1]:{xywh[1]},xywh[2]:{xywh[2]},xywh[3]:{xywh[3]},w:{w},h:{h}")
         if os.path.exists(detection_path):
-            if xywh_not_None == True:
-                x = float((int(float(xywh[0]/w)*1000000))/1000000)
-                y = float((int(float(xywh[1]/h)*1000000))/1000000)
-                w = float((int(float(xywh[2]/w)*1000000))/1000000)
-                h = float((int(float(xywh[3]/h)*1000000))/1000000)
+            if xywh_not_None == True and add_VPA==True:
+                x = float((int(float(xywh[0]/im_w)*1000000))/1000000)
+                y = float((int(float(xywh[1]/im_h)*1000000))/1000000)
+                w = float((int(float(xywh[2]/im_w)*1000000))/1000000)
+                h = float((int(float(xywh[3]/im_h)*1000000))/1000000)
                 la = self.vpa_label
                 # print(f"la = {la}")
-                DCA_lxywh = str(la) + " " \
+                VPA_lxywh = str(la) + " " \
                             +str(x) + " " \
                             +str(y) + " " \
                             + str(w) + " " \
-                            + str(h) 
+                            + str(h)
+                
+            if xywh_m_not_None==True and add_VMA==True:
+                # middle VPA bounding box
+                # print(f"xywh_m[0] = {xywh_m[0]}, xywh_m[1]={xywh_m[1]}, xywh_m[2]={xywh_m[2]}. xywh_m[3]={xywh_m[3]}")
+                # print(f"w={w}, h={h}")
+                x_m = float((int(float(xywh_m[0]/im_w)*1000000))/1000000)
+                y_m = float((int(float(xywh_m[1]/im_h)*1000000))/1000000)
+                w_m = float((int(float(xywh_m[2]/im_w)*1000000))/1000000)
+                h_m = float((int(float(xywh_m[3]/im_h)*1000000))/1000000)
+                la_m = self.vpam_label
+                # print(f"la = {la}")
+                VPA_lxywh_M = str(la_m) + " " \
+                            +str(x_m) + " " \
+                            +str(y_m) + " " \
+                            + str(w_m) + " " \
+                            + str(h_m)
+                # print(f"VPA_lxywh_M = {VPA_lxywh_M}")
             
             # print(f"x:{x},y:{y},w:{w},h:{h}")
             if not os.path.exists(self.save_txtdir):
@@ -119,13 +152,19 @@ class VPA(BaseDataset):
             if self.save_img:
                 shutil.copy(im_path,self.save_txtdir)
 
-            if DCA_lxywh is not None:
-                # Add DCA label into Yolo label.txt
+            if VPA_lxywh is not None:
+                # Add VPA label into Yolo label.txt
                 with open(save_label_path,'a') as f:
                     f.write("\n")
-                    f.write(DCA_lxywh)
+                    f.write(VPA_lxywh)
 
+            if VPA_lxywh_M is not None:
+                # Add VPA Middle label into Yolo label.txt
+                with open(save_label_path,'a') as f:
+                    f.write("\n")
+                    f.write(VPA_lxywh_M)
             # print(f"{la}:{x}:{y}:{w}:{h}")
+                    
             success = 1
         else:
             success = 0
@@ -133,6 +172,7 @@ class VPA(BaseDataset):
             return success
 
         return success
+
 
     def Get_DCA_XYWH(self,im_path,return_type=1):
         '''
@@ -191,7 +231,10 @@ class VPA(BaseDataset):
                         find_right_tmp_x = True
                 
                 # print(f"find_left_tmp_x:{find_left_tmp_x}")
-                # print(f"find_right_tmp_x:{find_right_tmp_x}")
+                # print(f"find_right_tmp_x:{find_right_tmp_x}")     
+                '''
+                find the largest width in main lane drivable area
+                '''
                 tmp_main_lane_width = abs(Right_tmp_X - Left_tmp_X)
                 if tmp_main_lane_width>main_lane_width:
                     main_lane_width = tmp_main_lane_width
@@ -235,45 +278,45 @@ class VPA(BaseDataset):
 
             # print(f"line Y :{Search_line_H} Left_X:{Left_X}, Right_X:{Right_X} Middle_X:{Middle_X}")
             
-            if self.show_im and return_type==1:
-            # if True:
-                start_point = (0,Search_line_H)
-                end_point = (w,Search_line_H)
-                color = (255,0,0)
-                thickness = 4
-                # search line
-                cv2.line(im_dri_cm, start_point, end_point, color, thickness)
-                cv2.line(im, start_point, end_point, color, thickness)
-                # left X
-                cv2.circle(im_dri_cm,(Left_X,Search_line_H), 10, (0, 255, 255), 3)
-                cv2.circle(im,(Left_X,Search_line_H), 10, (0, 255, 255), 3)
-                # right X
-                cv2.circle(im_dri_cm,(Right_X,Search_line_H), 10, (255, 0, 255), 3)
-                cv2.circle(im,(Right_X,Search_line_H), 10, (255, 0, 255), 3)
+        #     if self.show_im and return_type==1:
+        #     # if True:
+        #         start_point = (0,Search_line_H)
+        #         end_point = (w,Search_line_H)
+        #         color = (255,0,0)
+        #         thickness = 4
+        #         # search line
+        #         cv2.line(im_dri_cm, start_point, end_point, color, thickness)
+        #         cv2.line(im, start_point, end_point, color, thickness)
+        #         # left X
+        #         cv2.circle(im_dri_cm,(Left_X,Search_line_H), 10, (0, 255, 255), 3)
+        #         cv2.circle(im,(Left_X,Search_line_H), 10, (0, 255, 255), 3)
+        #         # right X
+        #         cv2.circle(im_dri_cm,(Right_X,Search_line_H), 10, (255, 0, 255), 3)
+        #         cv2.circle(im,(Right_X,Search_line_H), 10, (255, 0, 255), 3)
 
-                # middle vertical line
-                start_point = (Middle_X,0)
-                end_point = (Middle_X,h)
-                color = (255,127,0)
-                thickness = 4
-                cv2.line(im_dri_cm, start_point, end_point, color, thickness)
-                cv2.line(im, start_point, end_point, color, thickness)
+        #         # middle vertical line
+        #         start_point = (Middle_X,0)
+        #         end_point = (Middle_X,h)
+        #         color = (255,127,0)
+        #         thickness = 4
+        #         cv2.line(im_dri_cm, start_point, end_point, color, thickness)
+        #         cv2.line(im, start_point, end_point, color, thickness)
 
-                # DCA Bounding Box
-                cv2.rectangle(im_dri_cm, (Left_X, min_final_2), (Right_X, Search_line_H), (0,255,0) , 3, cv2.LINE_AA)
-                cv2.rectangle(im, (Left_X, min_final_2), (Right_X, Search_line_H), (0,255,0) , 3, cv2.LINE_AA)
-                cv2.imshow("drivable image",im_dri_cm)
-                cv2.imshow("image",im)
-                cv2.waitKey()
+        #         # DCA Bounding Box
+        #         cv2.rectangle(im_dri_cm, (Left_X, min_final_2), (Right_X, Search_line_H), (0,255,0) , 3, cv2.LINE_AA)
+        #         cv2.rectangle(im, (Left_X, min_final_2), (Right_X, Search_line_H), (0,255,0) , 3, cv2.LINE_AA)
+        #         cv2.imshow("drivable image",im_dri_cm)
+        #         cv2.imshow("image",im)
+        #         cv2.waitKey()
         if return_type == 1:
             return (Middle_X,Middle_Y,DCA_W,DCA_H),h,w
         elif return_type == 2:
             return (Left_X,Right_X,Search_line_H,min_final_2)
     
 
-    def Get_VPA_XYWH(self,im_path,return_type=1):
+    def Get_Two_VPA_XYWH(self,im_path,return_type=2):
         '''
-           func: Get VPA XYWH (Vanish Point Area)
+        func: Get VPA XYWH (Vanish Point Area)
 
         BDD100K Drivable map label :
         0: Main Lane
@@ -298,10 +341,10 @@ class VPA(BaseDataset):
                     h : image height
                     w : image width
                 type 2:
-                    (Left_X,Right_X,Search_line_H,VL_X,VL_Y)
-                    Left_X        : VPA bounding box left x
-                    Right_X       : VPA bounding box right x
-                    Search_line_H : the y of the min width (width = Right_X - Left_X) 
+                    (Left_X,Right_X,Search_line_H,VL_X,VL_Y),(Left_M_X,Right_M_X,Search_M_line_H)
+                    Left_X (Left_M_X)               : VPA bounding box left x (M: Middle)
+                    Right_X (Right_M_X)             : VPA bounding box right x (M: Middle)
+                    Search_line_H (Search_M_line_H) : the y of the min width (width = Right_X - Left_X) (M: Middle)
                     VL_X          : min vehicle coordinate x
                     VL_Y          : mi coordinate y
         '''
@@ -316,7 +359,10 @@ class VPA(BaseDataset):
             # print(f"h:{h}, w:{w}")
         if not os.path.exists(detection_path):
             print(f"{detection_path} is not exists !! PASS~~~")
-            return (None,None,None,None),None,None
+            if return_type==1:
+                return (None,None,None,None),None,None
+            else:
+                return None,None,None,None,None,None,None,None
 
         min_final,index = self.Get_Min_y_In_Drivable_Area(drivable_path)    
         VL = self.Find_Min_Y_Among_All_Vehicle_Bounding_Boxes_Ver2(min_final,detection_path,h,w)
@@ -343,6 +389,14 @@ class VPA(BaseDataset):
             find_top_y = False
             DCA_W = 0
             DCA_H = 0
+            # middle parameters
+            main_lane_width_m = 0
+            Search_M_line_H = 0
+            main_lane_middle_width = 9999
+            Final_Middle_Left_X = 0
+            Final_Middle_Right_X = 0
+            Search_Middle_line_H = 0
+
             ## Find the lowest X of Main lane drivable map
             for i in range(int(h)):
                 find_left_tmp_x = False
@@ -368,7 +422,10 @@ class VPA(BaseDataset):
                 # print(f"find_right_tmp_x:{find_right_tmp_x}")
                 tmp_main_lane_width = abs(Right_tmp_X - Left_tmp_X)
 
-                ## Find the Min Main Lane Width
+                '''
+                Find the minimun main lane drivable area width, 
+                and not at the vanish point
+                '''
                 if tmp_main_lane_width<main_lane_width\
                     and find_left_tmp_x==True \
                     and find_right_tmp_x==True \
@@ -383,17 +440,35 @@ class VPA(BaseDataset):
                     Final_Left_X = Left_tmp_X
                     Final_Right_X = Right_tmp_X
                     Search_line_H = i
+
+                '''
+                Find the midium main lane drivable area width, 
+                and not at the vanish point
+                '''
+                if tmp_main_lane_width>main_lane_width_m\
+                    and find_left_tmp_x==True \
+                    and find_right_tmp_x==True \
+                    and tmp_main_lane_width>=200 \
+                    and tmp_main_lane_width<=400 \
+                    and abs(i-Top_Y)>50 and i < (h-150):
+                 
+                    main_lane_width_m = tmp_main_lane_width
+                    Final_Middle_Left_X = Left_tmp_X
+                    Final_Middle_Right_X = Right_tmp_X
+                    Search_M_line_H = i
                      
+            # Middle bounding box
+            if Final_Middle_Left_X==0 and Final_Middle_Right_X==0:
+                Left_M_X = None
+                Right_M_X = None
+            else:
+                Left_M_X = Final_Middle_Left_X
+                Right_M_X = Final_Middle_Right_X
+                print(f"Left_M_X = {Left_M_X}")
+                print(f"Right_M_X = {Right_M_X}")
+                print(f"Search_M_line_H = {Search_M_line_H}")
 
-            # Search_line_H = int(Lowest_H - 80);
-
-            # Left_X = w
-            # update_left_x = False
-            # Right_X = 0
-            # update_right_x = False
-
-            # Left_X = int(VL_X - (VL_W * 2.0)) if VL_X - (VL_W * 2.0)>0 else 0
-            # Right_X = int(VL_X + (VL_W * 2.0)) if VL_X + (VL_W * 2.0)<w-1 else w-1
+            # Top bounding box
             if Final_Left_X==0 and Final_Right_X==0:
                 Left_X = None
                 Right_X = None
@@ -403,6 +478,7 @@ class VPA(BaseDataset):
 
 
             if Left_X is not None and Right_X is not None:
+                # Top bounding box
                 Middle_X = int((Left_X + Right_X)/2.0)
                 Middle_Y = int((h) / 2.0)
                 DCA_W = abs(Right_X - Left_X)
@@ -410,7 +486,13 @@ class VPA(BaseDataset):
                 # print(f"update_right_x:{update_right_x}")
 
                 # print(f"line Y :{Search_line_H} Left_X:{Left_X}, Right_X:{Right_X} Middle_X:{Middle_X}")
-            
+            if Left_M_X is not None and Right_M_X is not None:
+                # Middle bounding box
+                Middle_M_X = int((Left_M_X + Right_M_X)/2.0)
+                Middle_M_Y = int(Search_M_line_H/2.0)
+                VPA_M_W = abs(Right_M_X - Left_M_X)
+                VPA_M_H = abs(int(Search_M_line_H))
+
                 if self.show_im and return_type==1:
                 # if True:
                     # Search_line_H = VL_Y
@@ -421,12 +503,25 @@ class VPA(BaseDataset):
                     # search line
                     cv2.line(im_dri_cm, start_point, end_point, color, thickness)
                     cv2.line(im, start_point, end_point, color, thickness)
+
                     # left X
                     cv2.circle(im_dri_cm,(Left_X,Search_line_H), 10, (0, 255, 255), 3)
                     cv2.circle(im,(Left_X,Search_line_H), 10, (0, 255, 255), 3)
                     # right X
                     cv2.circle(im_dri_cm,(Right_X,Search_line_H), 10, (255, 0, 255), 3)
                     cv2.circle(im,(Right_X,Search_line_H), 10, (255, 0, 255), 3)
+
+
+
+                    # left X M
+                    cv2.circle(im_dri_cm,(Left_M_X,Search_M_line_H), 10, (0, 255, 255), 3)
+                    cv2.circle(im,(Left_M_X,Search_M_line_H), 10, (0, 255, 255), 3)
+                    # right X M
+                    cv2.circle(im_dri_cm,(Right_M_X,Search_M_line_H), 10, (255, 0, 255), 3)
+                    cv2.circle(im,(Right_M_X,Search_M_line_H), 10, (255, 0, 255), 3)
+
+
+
 
                     # middle vertical line
                     start_point = (Middle_X,0)
@@ -436,9 +531,14 @@ class VPA(BaseDataset):
                     cv2.line(im_dri_cm, start_point, end_point, color, thickness)
                     cv2.line(im, start_point, end_point, color, thickness)
 
-                    # DCA Bounding Box
+                    # VPA Bounding Box
                     cv2.rectangle(im_dri_cm, (Left_X, 0), (Right_X, h-1), (0,255,0) , 3, cv2.LINE_AA)
                     cv2.rectangle(im, (Left_X, 0), (Right_X, h-1), (0,255,0) , 3, cv2.LINE_AA)
+                    
+                    if Left_M_X is not None:
+                        cv2.rectangle(im_dri_cm, (Left_M_X, 0), (Right_M_X, Search_M_line_H), (0,127,127) , 3, cv2.LINE_AA)
+                        cv2.rectangle(im, (Left_M_X, 0), (Right_M_X, Search_M_line_H), (0,127,127) , 3, cv2.LINE_AA)
+
                     cv2.imshow("drivable image",im_dri_cm)
                     cv2.imshow("image",im)
                     cv2.waitKey()
@@ -451,13 +551,11 @@ class VPA(BaseDataset):
         # print(f"Middle_X:{Middle_X},Middle_Y:{Middle_Y},DCA_W:{DCA_W},DCA_H:{DCA_H}")
         if return_type==1:
             return (Middle_X,Middle_Y,DCA_W,DCA_H),h,w
-        elif return_type==2:
-            return (Left_X,Right_X,Search_line_H,VL_X,VL_Y)
+        if return_type==2:
+            return (Left_X,Right_X,Search_line_H,VL_X,VL_Y,Left_M_X,Right_M_X,Search_M_line_H)
 
     
-        
     
-
 
 
 
