@@ -168,7 +168,7 @@ class BaseDataset:
         
         
             
-    def Find_Min_Y_Among_All_Vehicle_Bounding_Boxes(self,min,detection_path,img_h,img_w):
+    def Find_Min_Y_Among_All_Vehicle_Bounding_Boxes(self,min,detection_path,img_h,img_w,type=1):
         # print(f"h:{img_h} w:{img_w}")
         min_rea = 999999
         find_min_area=False
@@ -208,8 +208,10 @@ class BaseDataset:
                         min_h=h
         if min is None:
             min = int(img_h/2.0)
-        return min
-        #return min,min_x,min_w,min_h
+        if type == 1:
+            return min
+        elif type==2:
+            return min,min_x,min_w,min_h
     
 
     def Find_Min_Y_Among_All_Vehicle_Bounding_Boxes_Ver2(self,min,detection_path,img_h,img_w):

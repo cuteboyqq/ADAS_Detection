@@ -111,7 +111,7 @@ def get_VPA_args():
     parser.add_argument('-saveimg','--save-img',type=bool,help='save images',default=False)
 
     parser.add_argument('-datatype','--data-type',help='data type',default="train")
-    parser.add_argument('-datanum','--data-num',type=int,help='number of images to crop',default=1000)
+    parser.add_argument('-datanum','--data-num',type=int,help='number of images to crop',default=70000)
 
 
 
@@ -130,9 +130,9 @@ def get_VPA_args():
     return parser.parse_args()
 
 '''
-    LA parameters
+    DUA parameters
 '''
-def get_LA_args():
+def get_DUA_args():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('-imdir','--im-dir',help='image directory',\
