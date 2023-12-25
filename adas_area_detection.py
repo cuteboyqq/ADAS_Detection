@@ -13,9 +13,9 @@ from engine.dataset import BaseDataset
 if __name__=="__main__":
    
     Get_VLA = False
-    Get_VPA = True
+    Get_VPA = False
     Get_DCA = False
-    Get_DUA  = False
+    Get_DUA  = True
     if Get_VLA:
         args_vla = get_VLA_args()
         vla = VLA(args_vla)
@@ -34,7 +34,7 @@ if __name__=="__main__":
     if Get_DUA:
         args_dua = get_DUA_args()
         dua = DUA(args_dua)
-        dua.Get_DUA_Yolo_Txt_Labels()
+        dua.Get_DUA_Yolo_Txt_Labels(Get_VPA=False,Get_DUA=True)
 
 
 
