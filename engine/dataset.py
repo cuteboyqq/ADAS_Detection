@@ -30,6 +30,7 @@ class BaseDataset:
         self.dca_label = args.dca_label
         self.vpa_label = args.vpa_label
         self.vpam_label = args.vpam_label
+        self.dla_label = args.dla_label
         self.save_img = args.save_img
 
         ## parse image detail
@@ -256,7 +257,72 @@ class BaseDataset:
             min = int(img_h/2.0)
         return (min,min_x,min_w,min_h)
         #return min,min_x,min_w,min_h
+   
+    def Add_Yolo_Txt_Label(self,xywh,detection_path,h,w,im_path,add_label=14):
+        '''
+            function : 
+                    Add_Yolo_Txt_Label
+            Purpose :
+                    1. Copy the original label.txt to new save txt directory
+                    2. Add new label lxywh to label.txt of YOLO foramt for all tasks (VLA,DCA,VPA,DUA,...,etc.)
+        '''
+        success = 0
+        xywh_not_None = True
+        ADAS_lxywh = None
+        if xywh[0] is not None and xywh[1] is not None:
+            xywh_not_None = True
+        else:
+            xywh_not_None = False
+        # print(f"xywh[0]:{xywh[0]},xywh[1]:{xywh[1]},xywh[2]:{xywh[2]},xywh[3]:{xywh[3]},w:{w},h:{h}")
+        if os.path.exists(detection_path):
+            if xywh_not_None == True:
+                x = float((int(float(xywh[0]/w)*1000000))/1000000)
+                y = float((int(float(xywh[1]/h)*1000000))/1000000)
+                w = float((int(float(xywh[2]/w)*1000000))/1000000)
+                h = float((int(float(xywh[3]/h)*1000000))/1000000)
+                la = add_label
+                # print(f"la = {la}")
+                ADAS_lxywh = str(la) + " " \
+                            +str(x) + " " \
+                            +str(y) + " " \
+                            + str(w) + " " \
+                            + str(h) 
+            
+            # print(f"x:{x},y:{y},w:{w},h:{h}")
+            if not os.path.exists(self.save_txtdir):
+                os.makedirs(self.save_txtdir,exist_ok=True)
+
+            label_txt_file = detection_path.split(os.sep)[-1]
+            save_label_path = os.path.join(self.save_txtdir,label_txt_file)
+            
+            # Copy the original label.txt into the save_label_path
+            if not os.path.exists(save_label_path):
+                shutil.copy(detection_path,save_label_path)
+            else:
+                print(f"File exists ,PASS! : {save_label_path}")
+                return success
+            
+
+            if self.save_img:
+                shutil.copy(im_path,self.save_txtdir)
+
+            if ADAS_lxywh is not None:
+                # Add DCA label into Yolo label.txt
+                with open(save_label_path,'a') as f:
+                    f.write("\n")
+                    f.write(ADAS_lxywh)
+
+            # print(f"{la}:{x}:{y}:{w}:{h}")
+            success = 1
+        else:
+            success = 0
+            print(f"detection_path:{detection_path} does not exists !! PASS~~~~~")
+            return success
+
+        return success
     
+
+
     ##============== VLA (Vanish Point Area)=================================
     def Get_Vanish_Area(self):
         return NotImplemented
@@ -358,7 +424,7 @@ class BaseDataset:
         return Final_Vehicle_X,Final_Vehicle_Y,Final_W, state
     
 
-    def Get_VPA(self,im_path,Up,Down, use_vehicle_info=False):
+    def Get_VPA(self,im_path,Up,Down, use_vehicle_info=True, force_show_im = True):
         # Vanish_line = Down[3]
         carhood = Down[2]
         drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type)
@@ -391,7 +457,7 @@ class BaseDataset:
         
         B_W = abs(int((R_X1 - L_X1)/2.0))
         #print(f"B_W:{B_W}")
-        if Left_X is not None and Right_X is not None:
+        if Left_X is not None and Right_X is not None and use_vehicle_info:
             Vehicle_X,Vehicle_Y,Final_W,state = self.Get_Vehicle_In_Middle_Image(detection_path,im,Left_X,Right_X,L_X2,R_X2,Th=200)
         # Vehicle_X = None
         # Vehicle_Y = None
@@ -424,83 +490,80 @@ class BaseDataset:
                 print("VP using line intersection")
         
 
-        if self.show_im and VP_X is not None:
+        if self.show_im and VP_X is not None and force_show_im:
             # if True:
-             
-                color = (255,0,0)
-                thickness = 4
-                # search line
-                # Vanish Point
-                cv2.circle(im_dri_cm,(VP_X,VP_Y), 10, (0, 255, 255), 3)
-                cv2.circle(im,(VP_X,VP_Y), 10, (0, 255, 255), 3)
+            color = (255,0,0)
+            thickness = 4
+            # search line
+            # Vanish Point
+            cv2.circle(im_dri_cm,(VP_X,VP_Y), 10, (0, 255, 255), 3)
+            cv2.circle(im,(VP_X,VP_Y), 10, (0, 255, 255), 3)
 
+        
             
-                
-                # Vehicle Point
-                if Vehicle_X is not None:
-                    cv2.circle(im_dri_cm,(Vehicle_X,Vehicle_Y), 10, (0, 255, 255), 3)
-                    cv2.circle(im,(Vehicle_X,Vehicle_Y), 10, (0, 255, 255), 3)
+            # Vehicle Point
+            if Vehicle_X is not None:
+                cv2.circle(im_dri_cm,(Vehicle_X,Vehicle_Y), 10, (0, 255, 255), 3)
+                cv2.circle(im,(Vehicle_X,Vehicle_Y), 10, (0, 255, 255), 3)
 
-                   
+            # Left p1
+            cv2.circle(im_dri_cm,p1, 10, (0, 128, 255), 3)
+            cv2.circle(im,p1, 10, (0, 128, 255), 3)
 
-                # Left p1
-                cv2.circle(im_dri_cm,p1, 10, (0, 128, 255), 3)
-                cv2.circle(im,p1, 10, (0, 128, 255), 3)
+            # Left p2
+            cv2.circle(im_dri_cm,p2, 10, (0, 128, 255), 3)
+            cv2.circle(im,p2, 10, (0, 128, 255), 3)
 
-                # Left p2
-                cv2.circle(im_dri_cm,p2, 10, (0, 128, 255), 3)
-                cv2.circle(im,p2, 10, (0, 128, 255), 3)
+            # Left p3
+            cv2.circle(im_dri_cm,p3, 10, (0, 128, 255), 3)
+            cv2.circle(im,p3, 10, (0, 128, 255), 3)
 
-                # Left p3
-                cv2.circle(im_dri_cm,p3, 10, (0, 128, 255), 3)
-                cv2.circle(im,p3, 10, (0, 128, 255), 3)
+            # Left p4
+            cv2.circle(im_dri_cm, p4, 10, (0, 128, 255), 3)
+            cv2.circle(im, p4, 10, (0, 128, 255), 3)
 
-                # Left p4
-                cv2.circle(im_dri_cm, p4, 10, (0, 128, 255), 3)
-                cv2.circle(im, p4, 10, (0, 128, 255), 3)
+            # Left line
+            start_point = (VP_X,VP_Y)
+            end_point = (L_X2,L_Y2)
+            color = (255,0,127)
+            thickness = 3
+            cv2.line(im_dri_cm, start_point, end_point, color, thickness)
+            cv2.line(im, start_point, end_point, color, thickness)
 
-                # Left line
-                start_point = (VP_X,VP_Y)
-                end_point = (L_X2,L_Y2)
-                color = (255,0,127)
-                thickness = 3
-                cv2.line(im_dri_cm, start_point, end_point, color, thickness)
-                cv2.line(im, start_point, end_point, color, thickness)
+            # Right line
+            start_point = (VP_X,VP_Y)
+            end_point = (R_X2,R_Y2)
+            color = (255,127,0)
+            thickness = 3
+            cv2.line(im_dri_cm, start_point, end_point, color, thickness)
+            cv2.line(im, start_point, end_point, color, thickness)
 
-                # Right line
-                start_point = (VP_X,VP_Y)
-                end_point = (R_X2,R_Y2)
-                color = (255,127,0)
-                thickness = 3
-                cv2.line(im_dri_cm, start_point, end_point, color, thickness)
-                cv2.line(im, start_point, end_point, color, thickness)
+            # left X
+            cv2.circle(im_dri_cm,(Left_X,Search_line_H), 10, (0, 255, 255), 3)
+            cv2.circle(im,(Left_X,Search_line_H), 10, (0, 255, 255), 3)
+            # right X
+            cv2.circle(im_dri_cm,(Right_X,Search_line_H), 10, (255, 0, 255), 3)
+            cv2.circle(im,(Right_X,Search_line_H), 10, (255, 0, 255), 3)
 
-                # left X
-                cv2.circle(im_dri_cm,(Left_X,Search_line_H), 10, (0, 255, 255), 3)
-                cv2.circle(im,(Left_X,Search_line_H), 10, (0, 255, 255), 3)
-                # right X
-                cv2.circle(im_dri_cm,(Right_X,Search_line_H), 10, (255, 0, 255), 3)
-                cv2.circle(im,(Right_X,Search_line_H), 10, (255, 0, 255), 3)
+            # middle vertical line
+            start_point = (VP_X,0)
+            end_point = (VP_X,h-1)
+            color = (255,127,0)
+            thickness = 4
+            cv2.line(im_dri_cm, start_point, end_point, color, thickness)
+            cv2.line(im, start_point, end_point, color, thickness)
 
-                # middle vertical line
-                start_point = (VP_X,0)
-                end_point = (VP_X,h-1)
-                color = (255,127,0)
-                thickness = 4
-                cv2.line(im_dri_cm, start_point, end_point, color, thickness)
-                cv2.line(im, start_point, end_point, color, thickness)
+            # VPA Bounding Box
+            cv2.rectangle(im_dri_cm, (Left_X, 0), (Right_X, carhood), (0,255,0) , 3, cv2.LINE_AA)
+            cv2.rectangle(im, (Left_X, 0), (Right_X, carhood), (0,255,0) , 3, cv2.LINE_AA)
 
-                # VPA Bounding Box
-                cv2.rectangle(im_dri_cm, (Left_X, 0), (Right_X, carhood), (0,255,0) , 3, cv2.LINE_AA)
-                cv2.rectangle(im, (Left_X, 0), (Right_X, carhood), (0,255,0) , 3, cv2.LINE_AA)
+            # if Up[2] is not None:
+            #     cv2.rectangle(im_dri_cm, (Up[0], 0), (Up[1], Up[2]), (0,127,127) , 3, cv2.LINE_AA)
+            #     cv2.rectangle(im, (Up[0], 0), (Up[1], Up[2]), (0,127,127) , 3, cv2.LINE_AA)
 
-                if Up[5] is not None:
-                    cv2.rectangle(im_dri_cm, (Up[5], 0), (Up[6], Up[7]), (0,127,127) , 3, cv2.LINE_AA)
-                    cv2.rectangle(im, (Up[5], 0), (Up[6], Up[7]), (0,127,127) , 3, cv2.LINE_AA)
-
-                cv2.imshow("drivable image",im_dri_cm)
-                cv2.imshow("image",im)
-                cv2.waitKey()
+            cv2.imshow("drivable image",im_dri_cm)
+            cv2.imshow("image",im)
+            cv2.waitKey()
 
         Final_Y = int(carhood / 2.0)
         Final_W = range*2

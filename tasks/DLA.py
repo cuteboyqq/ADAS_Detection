@@ -5,9 +5,9 @@ import cv2
 from engine.dataset import BaseDataset
 
 
-class VPA(BaseDataset):
+class DLA(BaseDataset):
 
-    def Get_VPA_Yolo_Txt_Labels(self, version=1):
+    def Get_DLA_Yolo_Txt_Labels(self, version=1):
         '''
             func: 
                 Get Vanish Point Area
@@ -34,9 +34,14 @@ class VPA(BaseDataset):
         min_final_2 = None
         
         for i in range(final_wanted_img_count):
+
+
+            xywh_left = (None,None,None,None)
+            xywh_right = (None,None,None,None)
             drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path_list[i],type=self.data_type)
             print(f"{i}:{im_path_list[i]}")
             im = cv2.imread(im_path_list[i])
+            im_dri_cm = cv2.imread(drivable_path)
             h,w = im.shape[0],im.shape[1]
            
             detection_file = detection_path.split(os.sep)[-1]
@@ -45,43 +50,125 @@ class VPA(BaseDataset):
                 print("save_txt_path exists , PASS~~~!!")
                 success = 1
                 continue
-            Down, Up= self.Get_DCA_XYWH(im_path_list[i],return_type=2) #(Left_X,Right_X,Search_line_H,min_final_2)
+            Down, Up= self.Get_DLA_XYWH(im_path_list[i],return_type=2) #(Left_X,Right_X,Search_line_H,min_final_2)
             # Up = self.Get_VPA_XYWH(im_path_list[i],return_type=2) 
-            #(Left_X,Right_X,Search_line_H,min_final_2),(Final_Left_X_upper,Final_Right_X_upper,Search_line_H_upper)
+            #(Left_X,Right_X,Search_line_H,min_final_2),(Final_Left_X_upper,Final_Right_X_upper,Search_line_H_upper,VL_X,VL_Y)
             if Down[0] is not None and Down[1] is not None and Up[0] is not None and Up[1] is not None \
                 and isinstance(Down[0],int)\
                 and isinstance(Down[1],int)\
                 and isinstance(Up[0],int)\
                 and isinstance(Up[1],int):
-                VP_x,VP_y,New_W,New_H = self.Get_VPA(im_path_list[i],Up,Down) # Up:(1,2,3,4,5) Down:(1,2,3,4) 
-          
+                VP_x,VP_y,New_W,New_H = self.Get_VPA(im_path_list[i],Up,Down,force_show_im=False,use_vehicle_info=True)
+                
                 x, y  = VP_x, VP_y
                 xywh = (VP_x,VP_y,New_W,New_H)
-            else:
-                xywh = (None,None,None,None)
-            
-            success = self.Add_VPA_Yolo_Txt_Label(xywh,detection_path,h,w,im_path_list[i])
+                
+                if VP_x is not None and VP_y is not None:
+                    # Left DLA bounding box
+                    left_x = int(Up[0])
+                    left_y = int(Down[2]/2.0)
+                    left_w = int(abs(VP_x - Up[0])) *2.0 
+                    left_h = int(Down[2])
+                    xywh_left = (left_x,left_y,left_w,left_h)
 
+                    # Right DLA bounding box
+                    right_x = int(Up[1])
+                    right_y = int(Down[2]/2.0)
+                    right_w = int(abs(Up[1] - VP_x)) *2.0
+                    right_h = int(Down[2])
+                    xywh_right = (right_x,right_y,right_w,right_h)
+                
+                if self.show_im and VP_x is not None:
+                    # if True:
+                    color = (255,0,0)
+                    thickness = 4
+                    # search line
+                    # Vanish Point
+                    cv2.circle(im_dri_cm,(VP_x,VP_y), 10, (0, 255, 255), 3)
+                    cv2.circle(im,(VP_x,VP_y), 10, (0, 255, 255), 3)
+
+                
+            
+                    # Left DLA
+                    p1 =  (left_x - int(left_w/2.0), 0)
+                    p2 = (left_x + int(left_w/2.0), left_h)
+                    cv2.rectangle(im_dri_cm, p1, p2, (0,255,0) , 3, cv2.LINE_AA)
+                    cv2.rectangle(im, p1, p2, (0,255,0) , 3, cv2.LINE_AA)
+                    
+                    # Right DLA
+                    p3 = (right_x - int(right_w/2.0), 0)
+                    p4 = (right_x + int(right_w/2.0), right_h)
+                    cv2.rectangle(im_dri_cm, p3, p4, (127,255,0) , 3, cv2.LINE_AA)
+                    cv2.rectangle(im, p3, p4, (127,255,0) , 3, cv2.LINE_AA)
+                    # if Up[2] is not None:
+                    #     cv2.rectangle(im_dri_cm, (Up[0], 0), (Up[1], Up[2]), (0,127,127) , 3, cv2.LINE_AA)
+                    #     cv2.rectangle(im, (Up[0], 0), (Up[1], Up[2]), (0,127,127) , 3, cv2.LINE_AA)
+
+                    cv2.imshow("drivable image",im_dri_cm)
+                    cv2.imshow("image",im)
+                    cv2.waitKey()
+                
+
+            else:
+                xywh_left = (None,None,None,None)
+                xywh_right = (None,None,None,None)
+            
+           
+            success = self.Add_DLA_Yolo_Txt_Label(xywh_left,xywh_right,detection_path,h,w,im_path_list[i],self.dla_label)
+
+            
     
 
-    def Add_VPA_Yolo_Txt_Label(self,xywh,detection_path,h,w,im_path):
+    def Add_DLA_Yolo_Txt_Label(self,xywh_left,xywh_right,detection_path,h,w,im_path,add_label):
+        '''
+            function : 
+                    Add_Yolo_Txt_Label
+            Purpose :
+                    1. Copy the original label.txt to new save txt directory
+                    2. Add new label lxywh to label.txt of YOLO foramt for all tasks (VLA,DCA,VPA,DUA,...,etc.)
+        '''
         success = 0
-        xywh_not_None = True
-        DCA_lxywh = None
-        if xywh[0] is not None and xywh[1] is not None:
-            xywh_not_None = True
+        # Left DLA
+        xywh_left_not_None = True
+        lxywh_left = None
+        if xywh_left[0] is not None and xywh_left[1] is not None:
+            xywh_left_not_None = True
         else:
-            xywh_not_None = False
+            xywh_left_not_None = False
+
+        # right DLA
+        xywh_right_not_None = True
+        lxywh_right = None
+        if xywh_right[0] is not None and xywh_right[1] is not None:
+            xywh_right_not_None = True
+        else:
+            xywh_right_not_None = False
+
         # print(f"xywh[0]:{xywh[0]},xywh[1]:{xywh[1]},xywh[2]:{xywh[2]},xywh[3]:{xywh[3]},w:{w},h:{h}")
-        if os.path.exists(detection_path):
-            if xywh_not_None == True:
-                x = float((int(float(xywh[0]/w)*1000000))/1000000)
-                y = float((int(float(xywh[1]/h)*1000000))/1000000)
-                w = float((int(float(xywh[2]/w)*1000000))/1000000)
-                h = float((int(float(xywh[3]/h)*1000000))/1000000)
-                la = self.vpa_label
+        im_w = w
+        im_h = h
+        if os.path.exists(detection_path) and w is not 0 and h is not 0:
+            if xywh_left_not_None == True:
+                x = float((int(float(xywh_left[0]/im_w)*1000000))/1000000)
+                y = float((int(float(xywh_left[1]/im_h)*1000000))/1000000)
+                w = float((int(float(xywh_left[2]/im_w)*1000000))/1000000)
+                h = float((int(float(xywh_left[3]/im_h)*1000000))/1000000)
+                la = add_label
                 # print(f"la = {la}")
-                DCA_lxywh = str(la) + " " \
+                lxywh_left = str(la) + " " \
+                            +str(x) + " " \
+                            +str(y) + " " \
+                            + str(w) + " " \
+                            + str(h) 
+            
+            if xywh_right_not_None == True:
+                x = float((int(float(xywh_right[0]/im_w)*1000000))/1000000)
+                y = float((int(float(xywh_right[1]/im_h)*1000000))/1000000)
+                w = float((int(float(xywh_right[2]/im_w)*1000000))/1000000)
+                h = float((int(float(xywh_right[3]/im_h)*1000000))/1000000)
+                la = add_label
+                # print(f"la = {la}")
+                lxywh_right = str(la) + " " \
                             +str(x) + " " \
                             +str(y) + " " \
                             + str(w) + " " \
@@ -105,11 +192,17 @@ class VPA(BaseDataset):
             if self.save_img:
                 shutil.copy(im_path,self.save_txtdir)
 
-            if DCA_lxywh is not None:
+            if lxywh_left is not None:
                 # Add DCA label into Yolo label.txt
                 with open(save_label_path,'a') as f:
                     f.write("\n")
-                    f.write(DCA_lxywh)
+                    f.write(lxywh_left)
+
+            if lxywh_right is not None:
+                # Add DCA label into Yolo label.txt
+                with open(save_label_path,'a') as f:
+                    f.write("\n")
+                    f.write(lxywh_right)
 
             # print(f"{la}:{x}:{y}:{w}:{h}")
             success = 1
@@ -120,7 +213,7 @@ class VPA(BaseDataset):
 
         return success
 
-    def Get_DCA_XYWH(self,im_path,return_type=1):
+    def Get_DLA_XYWH(self,im_path,return_type=1):
         '''
         BDD100K Drivable map label :
         0: Main Lane
@@ -269,36 +362,36 @@ class VPA(BaseDataset):
             
 
 
-            if self.show_im and return_type==1:
-            # if True:
-                start_point = (0,Search_line_H)
-                end_point = (w,Search_line_H)
-                color = (255,0,0)
-                thickness = 4
-                # search line
-                cv2.line(im_dri_cm, start_point, end_point, color, thickness)
-                cv2.line(im, start_point, end_point, color, thickness)
-                # left X
-                cv2.circle(im_dri_cm,(Left_X,Search_line_H), 10, (0, 255, 255), 3)
-                cv2.circle(im,(Left_X,Search_line_H), 10, (0, 255, 255), 3)
-                # right X
-                cv2.circle(im_dri_cm,(Right_X,Search_line_H), 10, (255, 0, 255), 3)
-                cv2.circle(im,(Right_X,Search_line_H), 10, (255, 0, 255), 3)
+            # if self.show_im and return_type==1:
+            # # if True:
+            #     start_point = (0,Search_line_H)
+            #     end_point = (w,Search_line_H)
+            #     color = (255,0,0)
+            #     thickness = 4
+            #     # search line
+            #     cv2.line(im_dri_cm, start_point, end_point, color, thickness)
+            #     cv2.line(im, start_point, end_point, color, thickness)
+            #     # left X
+            #     cv2.circle(im_dri_cm,(Left_X,Search_line_H), 10, (0, 255, 255), 3)
+            #     cv2.circle(im,(Left_X,Search_line_H), 10, (0, 255, 255), 3)
+            #     # right X
+            #     cv2.circle(im_dri_cm,(Right_X,Search_line_H), 10, (255, 0, 255), 3)
+            #     cv2.circle(im,(Right_X,Search_line_H), 10, (255, 0, 255), 3)
 
-                # middle vertical line
-                start_point = (Middle_X,0)
-                end_point = (Middle_X,h)
-                color = (255,127,0)
-                thickness = 4
-                cv2.line(im_dri_cm, start_point, end_point, color, thickness)
-                cv2.line(im, start_point, end_point, color, thickness)
+            #     # middle vertical line
+            #     start_point = (Middle_X,0)
+            #     end_point = (Middle_X,h)
+            #     color = (255,127,0)
+            #     thickness = 4
+            #     cv2.line(im_dri_cm, start_point, end_point, color, thickness)
+            #     cv2.line(im, start_point, end_point, color, thickness)
 
-                # DCA Bounding Box
-                cv2.rectangle(im_dri_cm, (Left_X, min_final_2), (Right_X, Search_line_H), (0,255,0) , 3, cv2.LINE_AA)
-                cv2.rectangle(im, (Left_X, min_final_2), (Right_X, Search_line_H), (0,255,0) , 3, cv2.LINE_AA)
-                cv2.imshow("drivable image",im_dri_cm)
-                cv2.imshow("image",im)
-                cv2.waitKey()
+            #     # DCA Bounding Box
+            #     cv2.rectangle(im_dri_cm, (Left_X, min_final_2), (Right_X, Search_line_H), (0,255,0) , 3, cv2.LINE_AA)
+            #     cv2.rectangle(im, (Left_X, min_final_2), (Right_X, Search_line_H), (0,255,0) , 3, cv2.LINE_AA)
+            #     cv2.imshow("drivable image",im_dri_cm)
+            #     cv2.imshow("image",im)
+            #     cv2.waitKey()
         else:
             return (None,None,None,None),(None,None,None,None,None) 
         if return_type == 1:
