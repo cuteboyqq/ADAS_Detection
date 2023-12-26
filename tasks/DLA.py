@@ -10,7 +10,7 @@ class DLA(BaseDataset):
     def Get_DLA_Yolo_Txt_Labels(self, version=1):
         '''
             func: 
-                Get Vanish Point Area
+                Get Drivable Line Area
             Purpose : 
                 parsing the images in given directory, 
                 find the Vanish Point Area (VPA: Vanish Point Area)
@@ -21,7 +21,7 @@ class DLA(BaseDataset):
                 self.dataset_dir : the dataset directory
                 self.save_dir : save crop image directory
             output:
-                the label.txt with VPA (VPA: Vanish Point Area) bounding box
+                the label.txt with left & right DLA (DLA: Drivable Line Area) bounding box
         '''
         im_path_list = glob.glob(os.path.join(self.im_dir,"*.jpg"))
 
@@ -125,7 +125,7 @@ class DLA(BaseDataset):
                     Add_Yolo_Txt_Label
             Purpose :
                     1. Copy the original label.txt to new save txt directory
-                    2. Add new label lxywh to label.txt of YOLO foramt for all tasks (VLA,DCA,VPA,DUA,...,etc.)
+                    2. Add left & right DLA label lxywh to label.txt of YOLO foramt
         '''
         success = 0
         # Left DLA
