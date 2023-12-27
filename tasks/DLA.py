@@ -92,8 +92,8 @@ class DLA(BaseDataset):
                     # Left DLA
                     p1 =  (left_x - int(left_w/2.0), 0)
                     p2 = (left_x + int(left_w/2.0), left_h)
-                    cv2.rectangle(im_dri_cm, p1, p2, (0,255,0) , 3, cv2.LINE_AA)
-                    cv2.rectangle(im, p1, p2, (0,255,0) , 3, cv2.LINE_AA)
+                    cv2.rectangle(im_dri_cm, p1, p2, (0,127,255) , 3, cv2.LINE_AA)
+                    cv2.rectangle(im, p1, p2, (0,127,255) , 3, cv2.LINE_AA)
                     
                     # Right DLA
                     p3 = (right_x - int(right_w/2.0), 0)
@@ -114,12 +114,12 @@ class DLA(BaseDataset):
                 xywh_right = (None,None,None,None)
             
            
-            success = self.Add_DLA_Yolo_Txt_Label(xywh_left,xywh_right,detection_path,h,w,im_path_list[i],self.dla_label)
+            success = self.Add_DLA_Yolo_Txt_Label(xywh_left,xywh_right,detection_path,h,w,im_path_list[i],self.dla_left_label,self.dla_right_label)
 
             
     
 
-    def Add_DLA_Yolo_Txt_Label(self,xywh_left,xywh_right,detection_path,h,w,im_path,add_label):
+    def Add_DLA_Yolo_Txt_Label(self,xywh_left,xywh_right,detection_path,h,w,im_path,left_label,right_label):
         '''
             function : 
                     Add_Yolo_Txt_Label
@@ -153,7 +153,7 @@ class DLA(BaseDataset):
                 y = float((int(float(xywh_left[1]/im_h)*1000000))/1000000)
                 w = float((int(float(xywh_left[2]/im_w)*1000000))/1000000)
                 h = float((int(float(xywh_left[3]/im_h)*1000000))/1000000)
-                la = add_label
+                la = left_label
                 # print(f"la = {la}")
                 lxywh_left = str(la) + " " \
                             +str(x) + " " \
@@ -166,7 +166,7 @@ class DLA(BaseDataset):
                 y = float((int(float(xywh_right[1]/im_h)*1000000))/1000000)
                 w = float((int(float(xywh_right[2]/im_w)*1000000))/1000000)
                 h = float((int(float(xywh_right[3]/im_h)*1000000))/1000000)
-                la = add_label
+                la = right_label
                 # print(f"la = {la}")
                 lxywh_right = str(la) + " " \
                             +str(x) + " " \

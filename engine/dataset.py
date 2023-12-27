@@ -29,8 +29,10 @@ class BaseDataset:
         self.vla_label = args.vla_label
         self.dca_label = args.dca_label
         self.vpa_label = args.vpa_label
-        self.vpam_label = args.vpam_label
-        self.dla_label = args.dla_label
+        self.dua_up_label = args.dua_uplabel
+        self.dua_down_label = args.dua_downlabel
+        self.dla_left_label = args.dla_leftlabel
+        self.dla_right_label = args.dla_rightlabel
         self.save_img = args.save_img
 
         ## parse image detail
