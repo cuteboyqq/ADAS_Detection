@@ -4,6 +4,7 @@ import shutil
 import cv2
 from engine.dataset import BaseDataset
 
+DETECTTION_FOLDER = "detection-DCA-VPA_ver3"
 
 class DUA(BaseDataset):
 
@@ -34,7 +35,7 @@ class DUA(BaseDataset):
         min_final_2 = None
         
         for i in range(final_wanted_img_count):
-            drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path_list[i],type=self.data_type,detect_folder="detection-DCA-VPA_ver3")
+            drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path_list[i],type=self.data_type,detect_folder=DETECTTION_FOLDER)
             print(f"{i}:{im_path_list[i]}")
             im = cv2.imread(im_path_list[i])
             h,w = im.shape[0],im.shape[1]
@@ -133,7 +134,7 @@ class DUA(BaseDataset):
 
         '''
         if os.path.exists(im_path):
-            drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type)
+            drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type,detect_folder=DETECTTION_FOLDER)
             im_h = 0
             im_w = 0
             if os.path.exists(drivable_path):
@@ -155,11 +156,11 @@ class DUA(BaseDataset):
         if os.path.exists(drivable_path) and os.path.exists(im_path):
             im_dri_cm = cv2.imread(drivable_path)
             im = cv2.imread(im_path)
-            DUA_down,h,w = self.Get_DUA_XYWH(im_path,return_type = 2, w_min=200, w_max=500, h_min=80, h_max=140,force_show_im=False)
-            #(Left_M_X,Right_M_X,Search_M_line_H,VL_Y),h,w
-            DUA_middle,h,w = self.Get_DUA_XYWH(im_path,return_type = 2, w_min=50, w_max=200, h_min=40, h_max=80,force_show_im=False)
-            DUA_up,h,w = self.Get_DUA_XYWH(im_path,return_type = 2, w_min=50, w_max=200, h_min=20, h_max=40,force_show_im=False)
-
+            # DUA_down,h,w = self.Get_DUA_XYWH(im_path,return_type = 2, w_min=200, w_max=500, h_min=80, h_max=140,force_show_im=False)
+            # #(Left_M_X,Right_M_X,Search_M_line_H,VL_Y),h,w
+            # DUA_middle,h,w = self.Get_DUA_XYWH(im_path,return_type = 2, w_min=50, w_max=200, h_min=40, h_max=80,force_show_im=False)
+            # DUA_up,h,w = self.Get_DUA_XYWH(im_path,return_type = 2, w_min=50, w_max=200, h_min=20, h_max=40,force_show_im=False)
+            DUA_up,DUA_middle,DUA_down,h,w = self.Get_DUA3_XYWH(im_path,return_type=2, h_upper=(20,40), h_middel=(40,80), h_down=(80,140),force_show_im=False)
             if DUA_down[0] is not None:
                 left_x = DUA_down[0]
                 right_x = DUA_down[1]
@@ -383,18 +384,24 @@ class DUA(BaseDataset):
                 with open(save_label_path,'a') as f:
                     f.write("\n")
                     f.write(DUA_lxywh_up)
+                    if DUA_lxywh_middle is not None:
+                        f.write("\n")
+                        f.write(DUA_lxywh_middle)
+                    if DUA_lxywh_down is not None:
+                        f.write("\n")
+                        f.write(DUA_lxywh_down)
 
-            if DUA_lxywh_middle is not None:
-                # Add VPA Middle label into Yolo label.txt
-                with open(save_label_path,'a') as f:
-                    f.write("\n")
-                    f.write(DUA_lxywh_middle)
+            # if DUA_lxywh_middle is not None:
+            #     # Add VPA Middle label into Yolo label.txt
+            #     with open(save_label_path,'a') as f:
+            #         f.write("\n")
+            #         f.write(DUA_lxywh_middle)
             
-            if DUA_lxywh_down is not None:
-                # Add VPA Middle label into Yolo label.txt
-                with open(save_label_path,'a') as f:
-                    f.write("\n")
-                    f.write(DUA_lxywh_down)
+            # if DUA_lxywh_down is not None:
+            #     # Add VPA Middle label into Yolo label.txt
+            #     with open(save_label_path,'a') as f:
+            #         f.write("\n")
+            #         f.write(DUA_lxywh_down)
             # print(f"{la}:{x}:{y}:{w}:{h}")           
             success = 1
         else:
@@ -440,7 +447,7 @@ class DUA(BaseDataset):
 
         '''
         if os.path.exists(im_path):
-            drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type)
+            drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type,detect_folder=DETECTTION_FOLDER)
             im_h = 0
             im_w = 0
             if os.path.exists(drivable_path):
@@ -823,6 +830,283 @@ class DUA(BaseDataset):
             return success
 
         return success
+    
+
+    def Get_DUA3_XYWH(self,im_path,return_type=1, h_upper=(20,40), h_middel=(40,80), h_down=(80,140),force_show_im=True):
+        '''
+        func: Get DUA XYWH (Drivable Upper Area)
+
+        Purpose : Get the bounding box that include below:
+                    1. Vanish point
+                    2. Upper Drivable area of main lane
+                and this bounding box information xywh for detection label (YOLO label.txt)
+        input parameter : 
+                    im_path : image directory path
+        output :
+                type 1:
+                    (Middle_X,Middle_Y,DCA_W,DCA_H),h,w
+
+                    Middle_X : bounding box center X
+                    Middle_Y : bounding box center Y
+                    DCA_W    : bounding box W
+                    DCA_H    : bounding box H
+                    h : image height
+                    w : image width
+                type 2:
+                    (Left_X,Right_X,Search_line_H,VL_X,VL_Y),(Left_M_X,Right_M_X,Search_M_line_H)
+                    Left_X (Left_M_X)               : VPA bounding box left x (M: Middle)
+                    Right_X (Right_M_X)             : VPA bounding box right x (M: Middle)
+                    Search_line_H (Search_M_line_H) : the y of the min width (width = Right_X - Left_X) (M: Middle)
+                    VL_X          : min vehicle coordinate x
+                    VL_Y          : mi coordinate y
+        '''
+        drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type,detect_folder=DETECTTION_FOLDER)
+        h = 0
+        w = 0
+        if os.path.exists(drivable_path):
+            im_dri = cv2.imread(drivable_mask_path)
+            h,w = im_dri.shape[0],im_dri.shape[1]
+            # print(f"h:{h}, w:{w}")
+        if not os.path.exists(detection_path):
+            print(f"{detection_path} is not exists !! PASS~~~")
+            if return_type==1:
+                return (None,None,None,None),(None,None,None,None),(None,None,None,None),None,None
+            else:
+                return (None,None,None,None),(None,None,None,None),(None,None,None,None),None,None
+
+        min_final,index = self.Get_Min_y_In_Drivable_Area(drivable_path)    
+        VL = self.Find_Min_Y_Among_All_Vehicle_Bounding_Boxes_Ver2(min_final,detection_path,h,w)
+        VL_Y,VL_X,VL_W,VL_H = VL
+        # print(f"VL_Y:{VL_Y},VL_X:{VL_X},VL_W:{VL_W},VL_H:{VL_H}")
+        dri_map = {"MainLane": 0, "AlterLane": 1, "BackGround":2}
+        
+        if os.path.exists(drivable_path):
+            
+            im_dri_cm = cv2.imread(drivable_path)
+            im = cv2.imread(im_path)
+
+            Lowest_H = 0
+            Left_tmp_X = 0
+            Right_tmp_X = 0
+            find_left_tmp_x = False
+            find_right_tmp_x = False
+    
+            Top_Y = 0
+            temp_y = 0
+            find_top_y = False
+            DCA_W = 0
+            DCA_H = 0
+
+
+            # initialize upper parameters
+            main_lane_width_up = 0
+            main_lane_upper_width = 9999
+            Final_Up_Left_X = 0
+            Final_Up_Right_X = 0
+            Search_Up_line_H = 0
+
+            # initialize middle parameters
+            main_lane_width_mid = 0
+            main_lane_middle_width = 9999
+            Final_Mid_Left_X = 0
+            Final_Mid_Right_X = 0
+            Search_Mid_line_H = 0
+
+            # initialize down parameters
+            main_lane_width_down = 0
+            main_lane_down_width = 9999
+            Final_Down_Left_X = 0
+            Final_Down_Right_X = 0
+            Search_Down_line_H = 0
+
+            ## Find the lowest X of Main lane drivable map
+            for i in range(int(h)):
+                find_left_tmp_x = False
+                find_right_tmp_x = False
+                for j in range(int(w)):
+
+                    if int(im_dri[i][j][0]) == dri_map["MainLane"]:
+                        if i>Lowest_H:
+                            Lowest_H = i
+                        if find_top_y==False:
+                            Top_Y = i
+                            find_top_y = True
+                    if int(im_dri[i][j][0]) == dri_map["MainLane"] and find_left_tmp_x==False:
+                        Left_tmp_X = j
+                        find_left_tmp_x = True
+
+                    if int(im_dri[i][j][0]) == dri_map["BackGround"] and find_right_tmp_x==False and find_left_tmp_x==True:
+                        Right_tmp_X = j
+                        find_right_tmp_x = True
+                        temp_y = i
+                
+                # print(f"find_left_tmp_x:{find_left_tmp_x}")
+                # print(f"find_right_tmp_x:{find_right_tmp_x}")
+                tmp_main_lane_width = abs(Right_tmp_X - Left_tmp_X)
+
+
+                '''
+                Find the upper main lane drivable area width, 
+                and not at the vanish point
+                '''
+                if tmp_main_lane_width>main_lane_width_up\
+                    and find_left_tmp_x==True \
+                    and find_right_tmp_x==True \
+                    and abs(i-Top_Y)>h_upper[0] and abs(i-Top_Y) < h_upper[1]:
+                 
+                    main_lane_width_up = tmp_main_lane_width
+                    Final_Up_Left_X = Left_tmp_X
+                    Final_Up_Right_X = Right_tmp_X
+                    Search_Up_line_H = i
+                '''
+                Find the middle main lane drivable area width, 
+                and not at the vanish point
+                '''
+                if tmp_main_lane_width>main_lane_width_mid\
+                    and find_left_tmp_x==True \
+                    and find_right_tmp_x==True \
+                    and abs(i-Top_Y)>h_middel[0] and abs(i-Top_Y) < h_middel[1]:
+                 
+                    main_lane_width_mid = tmp_main_lane_width
+                    Final_Mid_Left_X = Left_tmp_X
+                    Final_Mid_Right_X = Right_tmp_X
+                    Search_Mid_line_H = i
+
+                '''
+                Find the down main lane drivable area width, 
+                and not at the vanish point
+                '''
+                if tmp_main_lane_width>main_lane_width_down\
+                    and find_left_tmp_x==True \
+                    and find_right_tmp_x==True \
+                    and abs(i-Top_Y)>h_down[0] and abs(i-Top_Y) < h_down[1]:
+                 
+                    main_lane_width_down = tmp_main_lane_width
+                    Final_Down_Left_X = Left_tmp_X
+                    Final_Down_Right_X = Right_tmp_X
+                    Search_Down_line_H = i
+                     
+            '''
+            Get Upper bounding box "
+            1. left x
+            2. right x
+            3. lower bound y 
+            '''
+            if Final_Up_Left_X==0 and Final_Up_Right_X==0:
+                Left_Up_X = None
+                Right_Up_X = None
+            else:
+                Left_Up_X = Final_Up_Left_X
+                Right_Up_X = Final_Up_Right_X
+                # print(f"Left_M_X = {Left_M_X}")
+                # print(f"Right_M_X = {Right_M_X}")
+                # print(f"Search_M_line_H = {Search_M_line_H}")
+            
+            '''
+            Get Middle bounding box
+            1. left x
+            2. right x
+            3. lower bound y 
+            '''
+            if Final_Mid_Left_X==0 and Final_Mid_Right_X==0:
+                Left_Mid_X = None
+                Right_Mid_X = None
+            else:
+                Left_Mid_X = Final_Mid_Left_X
+                Right_Mid_X = Final_Mid_Right_X
+
+            '''
+            Get Down bounding box
+            1. left x
+            2. right x
+            3. lower bound y 
+            '''
+            if Final_Down_Left_X==0 and Final_Down_Right_X==0:
+                Left_Down_X = None
+                Right_Down_X = None
+            else:
+                Left_Down_X = Final_Down_Left_X
+                Right_Down_X = Final_Down_Right_X
+
+                # print(f"line Y :{Search_line_H} Left_X:{Left_X}, Right_X:{Right_X} Middle_X:{Middle_X}")
+
+            '''
+            Get Upper DUA xywh
+            '''
+            if Left_Up_X is not None and Right_Up_X is not None:
+                # Middle bounding box
+                DUA_Up_X = int((Left_Up_X + Right_Up_X)/2.0)
+                DUA_Up_Y = int(Search_Up_line_H + VL_Y /2.0)
+                DUA_Up_W = abs(Right_Up_X - Left_Up_X)
+                DUA_Up_H = abs(int(Search_Up_line_H - VL_Y + 1))
+            else:
+                DUA_Up_X = None
+                DUA_Up_Y = None
+                DUA_Up_W = None
+                DUA_Up_H = None
+                Search_Up_line_H = None
+
+            '''
+            Get Middle DUA xywh
+            '''
+            if Left_Mid_X is not None and Right_Mid_X is not None:
+                # Middle bounding box
+                DUA_Mid_X = int((Left_Mid_X + Right_Mid_X)/2.0)
+                DUA_Mid_Y = int(Search_Mid_line_H + VL_Y /2.0)
+                DUA_Mid_W = abs(Right_Mid_X - Left_Mid_X)
+                DUA_Mid_H = abs(int(Search_Mid_line_H - VL_Y + 1))
+            else:
+                DUA_Mid_X = None
+                DUA_Mid_Y = None
+                DUA_Mid_W = None
+                DUA_Mid_H = None
+                Search_Mid_line_H = None
+
+            '''
+            Get Down DUA xywh
+            '''
+            if Left_Down_X is not None and Right_Down_X is not None:
+                # Middle bounding box
+                DUA_Down_X = int((Left_Down_X + Right_Down_X)/2.0)
+                DUA_Down_Y = int(Search_Down_line_H + VL_Y /2.0)
+                DUA_Down_W = abs(Right_Down_X - Left_Down_X)
+                DUA_Down_H = abs(int(Search_Down_line_H - VL_Y + 1))
+            else:
+                DUA_Down_X = None
+                DUA_Down_Y = None
+                DUA_Down_W = None
+                DUA_Down_H = None
+                Search_Down_line_H = None
+            
+            
+            if self.show_im and return_type==1 and force_show_im:
+                
+                # # upper X M
+                # cv2.circle(im_dri_cm,(Left_M_X,Search_M_line_H), 10, (0, 255, 255), 3)
+                # cv2.circle(im,(Left_M_X,Search_M_line_H), 10, (0, 255, 255), 3)
+                # # right X M
+                # cv2.circle(im_dri_cm,(Right_M_X,Search_M_line_H), 10, (255, 0, 255), 3)
+                # cv2.circle(im,(Right_M_X,Search_M_line_H), 10, (255, 0, 255), 3)
+
+                
+                if Left_Mid_X is not None:
+                    cv2.rectangle(im_dri_cm, (Left_Mid_X, 0), (Right_Mid_X, Search_Mid_line_H), (0,127,127) , 3, cv2.LINE_AA)
+                    cv2.rectangle(im, (Left_Mid_X, 0), (Right_Mid_X, Search_Mid_line_H), (0,127,127) , 3, cv2.LINE_AA)
+
+                cv2.imshow("drivable image",im_dri_cm)
+                cv2.imshow("image",im)
+                cv2.waitKey()
+        else:
+            if return_type==1:
+                return (None,None,None,None),(None,None,None,None),(None,None,None,None),None,None
+            if return_type==2:
+                return (None,None,None,None),(None,None,None,None),(None,None,None,None),None,None
+        
+        # print(f"Middle_X:{Middle_X},Middle_Y:{Middle_Y},DCA_W:{DCA_W},DCA_H:{DCA_H}")
+        if return_type==1:
+            return (DUA_Up_X,DUA_Up_Y,DUA_Up_W,DUA_Up_H),(DUA_Mid_X,DUA_Mid_Y,DUA_Mid_W,DUA_Mid_H),(DUA_Down_X,DUA_Down_Y,DUA_Down_W,DUA_Down_H),h,w
+        if return_type==2:
+            return (Left_Up_X,Right_Up_X,Search_Up_line_H,VL_Y),(Left_Mid_X,Right_Mid_X,Search_Mid_line_H,VL_Y),(Left_Down_X,Right_Down_X,Search_Down_line_H,VL_Y),h,w
 
     def Get_DUA_XYWH(self,im_path,return_type=1, w_min=200, w_max=400, h_min=50, h_max=150,force_show_im=True):
         '''
@@ -858,7 +1142,7 @@ class DUA(BaseDataset):
                     VL_X          : min vehicle coordinate x
                     VL_Y          : mi coordinate y
         '''
-        drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type)
+        drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type,detect_folder=DETECTTION_FOLDER)
         h = 0
         w = 0
         if os.path.exists(drivable_path):
@@ -1015,7 +1299,7 @@ class DUA(BaseDataset):
         2: BackGround
         '''
         
-        drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type)
+        drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type,detect_folder=DETECTTION_FOLDER)
 
         h = 0
         w = 0
@@ -1182,7 +1466,7 @@ class DUA(BaseDataset):
                     VL_Y          : mi coordinate y
         '''
         
-        drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type)
+        drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type,detect_folder=DETECTTION_FOLDER)
 
         h = 0
         w = 0

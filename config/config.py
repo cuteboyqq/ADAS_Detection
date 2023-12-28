@@ -5,11 +5,11 @@ import cv2
 
 ## =======Set parameters for all get_XXX_args()==================================================
 SHOW_IMAGE = False
-SAVE_IMAGE = True
-DATA_NUM = 70000
-DATA_TYPE = "train"
-IMG_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.9/images/100k/train"
-SAVE_TXT_DIR = "/home/ali/Projects/datasets/BDD100K_Train_DUA_label_Txt_2023-12-28-Test------------------------"
+SAVE_IMAGE = False
+DATA_NUM = 10000
+DATA_TYPE = "val"
+IMG_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.9/images/100k/val"
+SAVE_TXT_DIR = "/home/ali/Projects/datasets/BDD100K_Val_DCA_VPA_DUA3_label_Txt_2023-12-28"
 DATA_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.9"
 VLA_LABEL = 12
 DCA_LABEL = 13
