@@ -38,7 +38,8 @@ class DLA(BaseDataset):
 
             xywh_left = (None,None,None,None)
             xywh_right = (None,None,None,None)
-            drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path_list[i],type=self.data_type)
+            drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path_list[i],type=self.data_type, \
+                                                                                             detect_folder="detection-DCA-VPA_ver3")
             print(f"{i}:{im_path_list[i]}")
             im = cv2.imread(im_path_list[i])
             im_dri_cm = cv2.imread(drivable_path)
@@ -62,21 +63,40 @@ class DLA(BaseDataset):
                 
                 x, y  = VP_x, VP_y
                 xywh = (VP_x,VP_y,New_W,New_H)
-                
-                if VP_x is not None and VP_y is not None:
-                    # Left DLA bounding box
-                    left_x = int(Up[0])
-                    left_y = int(Down[2]/2.0)
-                    left_w = int(abs(VP_x - Up[0])) *2.0 
-                    left_h = int(Down[2])
-                    xywh_left = (left_x,left_y,left_w,left_h)
 
-                    # Right DLA bounding box
-                    right_x = int(Up[1])
-                    right_y = int(Down[2]/2.0)
-                    right_w = int(abs(Up[1] - VP_x)) *2.0
-                    right_h = int(Down[2])
-                    xywh_right = (right_x,right_y,right_w,right_h)
+                Dynamic_BB_Size = False
+                Fixed_BB_Size = True
+
+                if VP_x is not None and VP_y is not None:
+                    if Dynamic_BB_Size:
+                        # Left DLA bounding box
+                        left_x = int(Up[0])
+                        left_y = int(Down[2]/2.0)
+                        left_w = int(abs(VP_x - Up[0])) *2.0 
+                        left_h = int(Down[2])
+                        xywh_left = (left_x,left_y,left_w,left_h)
+
+                        # Right DLA bounding box
+                        right_x = int(Up[1])
+                        right_y = int(Down[2]/2.0)
+                        right_w = int(abs(Up[1] - VP_x)) *2.0
+                        right_h = int(Down[2])
+                        xywh_right = (right_x,right_y,right_w,right_h)
+                    elif Fixed_BB_Size:
+                        exp_range = 40
+                        # Left DLA bounding box
+                        left_x = int(Up[0])
+                        left_y = int(Down[2]/2.0)
+                        left_w = int(exp_range) * 2 
+                        left_h = int(Down[2])
+                        xywh_left = (left_x,left_y,left_w,left_h)
+
+                        # Right DLA bounding box
+                        right_x = int(Up[1])
+                        right_y = int(Down[2]/2.0)
+                        right_w = int(exp_range) * 2
+                        right_h = int(Down[2])
+                        xywh_right = (right_x,right_y,right_w,right_h)
                 
                 if self.show_im and VP_x is not None:
                     # if True:
@@ -221,7 +241,8 @@ class DLA(BaseDataset):
         2: BackGround
         '''
         
-        drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type)
+        drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type, \
+                                                                                         detect_folder="detection-DCA-VPA_ver3")
 
         h = 0
         w = 0
@@ -435,7 +456,8 @@ class DLA(BaseDataset):
                     VL_Y          : mi coordinate y
         '''
         
-        drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type)
+        drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type, \
+                                                                                         detect_folder="detection-DCA-VPA_ver3")
 
         h = 0
         w = 0

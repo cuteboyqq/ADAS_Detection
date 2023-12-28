@@ -36,7 +36,7 @@ if __name__=="__main__":
     if Get_DUA:
         args_dua = get_DUA_args()
         dua = DUA(args_dua)
-        dua.Get_DUA_Yolo_Txt_Labels(Get_VPA=False,Get_DUA=False,Get_Two_DUA=True)
+        dua.Get_DUA_Yolo_Txt_Labels(Get_VPA=False,Get_DUA=False,Get_Two_DUA=False,Get_Three_DUA=True)
     
     if Get_DLA:
         args_dla = get_DLA_args()

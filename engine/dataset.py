@@ -30,6 +30,7 @@ class BaseDataset:
         self.dca_label = args.dca_label
         self.vpa_label = args.vpa_label
         self.dua_up_label = args.dua_uplabel
+        self.dua_mid_label = args.dua_middlelabel
         self.dua_down_label = args.dua_downlabel
         self.dla_left_label = args.dla_leftlabel
         self.dla_right_label = args.dla_rightlabel

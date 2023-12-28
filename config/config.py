@@ -5,19 +5,20 @@ import cv2
 
 ## =======Set parameters for all get_XXX_args()==================================================
 SHOW_IMAGE = False
-SAVE_IMAGE = False
+SAVE_IMAGE = True
 DATA_NUM = 70000
 DATA_TYPE = "train"
 IMG_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.9/images/100k/train"
-SAVE_TXT_DIR = "/home/ali/Projects/datasets/BDD100K_Train_DCA_VPA_DUA2_label_Txt_2023-12-27"
+SAVE_TXT_DIR = "/home/ali/Projects/datasets/BDD100K_Train_DUA_label_Txt_2023-12-28-Test------------------------"
 DATA_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.9"
 VLA_LABEL = 12
 DCA_LABEL = 13
 VPA_LABEL = 14
 DUA_UP_LABEL = 15
-DUA_DOWN_LABEL = 16
-DLA_LEFT_LABEL = 17
-DLA_RIGHT_LABEL = 18
+DUA_MIDDLE_LABEL = 16
+DUA_DOWN_LABEL = 17
+DLA_LEFT_LABEL = 18
+DLA_RIGHT_LABEL = 19
 ## ===============================================================================================
 '''
     VLA parameters
@@ -38,8 +39,9 @@ def get_VLA_args():
     parser.add_argument('-vlalabel','--vla-label',type=int,help='VLA label',default=VLA_LABEL)
     parser.add_argument('-dcalabel','--dca-label',type=int,help='DCA label',default=DCA_LABEL)
     parser.add_argument('-vpalabel','--vpa-label',type=int,help='DCA label',default=VPA_LABEL)
-    parser.add_argument('-duauplabel','--dua-uplabel',type=int,help='VPA middle label',default=DUA_UP_LABEL)
-    parser.add_argument('-duadownlabel','--dua-downlabel',type=int,help='VPA middle label',default=DUA_DOWN_LABEL)
+    parser.add_argument('-duauplabel','--dua-uplabel',type=int,help='VUA up label',default=DUA_UP_LABEL)
+    parser.add_argument('-duamiddlelabel','--dua-middlelabel',type=int,help='VUA middle label',default=DUA_MIDDLE_LABEL)
+    parser.add_argument('-duadownlabel','--dua-downlabel',type=int,help='VUA down label',default=DUA_DOWN_LABEL)
     parser.add_argument('-dlaleftlabel','--dla-leftlabel',type=int,help='DLA label',default=DLA_LEFT_LABEL)
     parser.add_argument('-dlarightlabel','--dla-rightlabel',type=int,help='DLA label',default=DLA_RIGHT_LABEL)
     parser.add_argument('-saveimg','--save-img',type=bool,help='save images',default=SAVE_IMAGE)
@@ -83,8 +85,9 @@ def get_DCA_args():
     parser.add_argument('-vlalabel','--vla-label',type=int,help='VLA label',default=VLA_LABEL)
     parser.add_argument('-dcalabel','--dca-label',type=int,help='DCA label',default=DCA_LABEL)
     parser.add_argument('-vpalabel','--vpa-label',type=int,help='DCA label',default=VPA_LABEL)
-    parser.add_argument('-duauplabel','--dua-uplabel',type=int,help='VPA middle label',default=DUA_UP_LABEL)
-    parser.add_argument('-duadownlabel','--dua-downlabel',type=int,help='VPA middle label',default=DUA_DOWN_LABEL)
+    parser.add_argument('-duauplabel','--dua-uplabel',type=int,help='VUA up label',default=DUA_UP_LABEL)
+    parser.add_argument('-duamiddlelabel','--dua-middlelabel',type=int,help='VUA middle label',default=DUA_MIDDLE_LABEL)
+    parser.add_argument('-duadownlabel','--dua-downlabel',type=int,help='VUA down label',default=DUA_DOWN_LABEL)
     parser.add_argument('-dlaleftlabel','--dla-leftlabel',type=int,help='DLA label',default=DLA_LEFT_LABEL)
     parser.add_argument('-dlarightlabel','--dla-rightlabel',type=int,help='DLA label',default=DLA_RIGHT_LABEL)
     parser.add_argument('-saveimg','--save-img',type=bool,help='save images',default=SAVE_IMAGE)
@@ -128,8 +131,9 @@ def get_VPA_args():
     parser.add_argument('-vlalabel','--vla-label',type=int,help='VLA label',default=VLA_LABEL)
     parser.add_argument('-dcalabel','--dca-label',type=int,help='DCA label',default=DCA_LABEL)
     parser.add_argument('-vpalabel','--vpa-label',type=int,help='DCA label',default=VPA_LABEL)
-    parser.add_argument('-duauplabel','--dua-uplabel',type=int,help='VPA middle label',default=DUA_UP_LABEL)
-    parser.add_argument('-duadownlabel','--dua-downlabel',type=int,help='VPA middle label',default=DUA_DOWN_LABEL)
+    parser.add_argument('-duauplabel','--dua-uplabel',type=int,help='VUA up label',default=DUA_UP_LABEL)
+    parser.add_argument('-duamiddlelabel','--dua-middlelabel',type=int,help='VUA middle label',default=DUA_MIDDLE_LABEL)
+    parser.add_argument('-duadownlabel','--dua-downlabel',type=int,help='VUA down label',default=DUA_DOWN_LABEL)
     parser.add_argument('-dlaleftlabel','--dla-leftlabel',type=int,help='DLA label',default=DLA_LEFT_LABEL)
     parser.add_argument('-dlarightlabel','--dla-rightlabel',type=int,help='DLA label',default=DLA_RIGHT_LABEL)
     parser.add_argument('-saveimg','--save-img',type=bool,help='save images',default=SAVE_IMAGE)
@@ -172,8 +176,9 @@ def get_DUA_args():
     parser.add_argument('-vlalabel','--vla-label',type=int,help='VLA label',default=VLA_LABEL)
     parser.add_argument('-dcalabel','--dca-label',type=int,help='DCA label',default=DCA_LABEL)
     parser.add_argument('-vpalabel','--vpa-label',type=int,help='VPA label',default=VPA_LABEL)
-    parser.add_argument('-duauplabel','--dua-uplabel',type=int,help='VPA middle label',default=DUA_UP_LABEL)
-    parser.add_argument('-duadownlabel','--dua-downlabel',type=int,help='VPA middle label',default=DUA_DOWN_LABEL)
+    parser.add_argument('-duauplabel','--dua-uplabel',type=int,help='VUA up label',default=DUA_UP_LABEL)
+    parser.add_argument('-duamiddlelabel','--dua-middlelabel',type=int,help='VUA middle label',default=DUA_MIDDLE_LABEL)
+    parser.add_argument('-duadownlabel','--dua-downlabel',type=int,help='VUA down label',default=DUA_DOWN_LABEL)
     parser.add_argument('-dlaleftlabel','--dla-leftlabel',type=int,help='DLA label',default=DLA_LEFT_LABEL)
     parser.add_argument('-dlarightlabel','--dla-rightlabel',type=int,help='DLA label',default=DLA_RIGHT_LABEL)
     parser.add_argument('-saveimg','--save-img',type=bool,help='save images',default=SAVE_IMAGE)
@@ -216,8 +221,9 @@ def get_DLA_args():
     parser.add_argument('-vlalabel','--vla-label',type=int,help='VLA label',default=VLA_LABEL)
     parser.add_argument('-dcalabel','--dca-label',type=int,help='DCA label',default=DCA_LABEL)
     parser.add_argument('-vpalabel','--vpa-label',type=int,help='VPA label',default=VPA_LABEL)
-    parser.add_argument('-duauplabel','--dua-uplabel',type=int,help='VPA middle label',default=DUA_UP_LABEL)
-    parser.add_argument('-duadownlabel','--dua-downlabel',type=int,help='VPA middle label',default=DUA_DOWN_LABEL)
+    parser.add_argument('-duauplabel','--dua-uplabel',type=int,help='VUA up label',default=DUA_UP_LABEL)
+    parser.add_argument('-duamiddlelabel','--dua-middlelabel',type=int,help='VUA middle label',default=DUA_MIDDLE_LABEL)
+    parser.add_argument('-duadownlabel','--dua-downlabel',type=int,help='VUA down label',default=DUA_DOWN_LABEL)
     parser.add_argument('-dlaleftlabel','--dla-leftlabel',type=int,help='DLA label',default=DLA_LEFT_LABEL)
     parser.add_argument('-dlarightlabel','--dla-rightlabel',type=int,help='DLA label',default=DLA_RIGHT_LABEL)
     parser.add_argument('-saveimg','--save-img',type=bool,help='save images',default=SAVE_IMAGE)
