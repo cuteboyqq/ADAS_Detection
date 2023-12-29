@@ -30,10 +30,7 @@ if __name__=="__main__":
         dca = DCA(args_dca)
         dca.Get_DCA_Yolo_Txt_Labels()
 
-    if Get_VPA:
-        args_vpa = get_VPA_args()
-        vpa = VPA(args_vpa)
-        vpa.Get_VPA_Yolo_Txt_Labels()
+    
     
     if Get_DUA:
         args_dua = get_DUA_args()
@@ -49,5 +46,10 @@ if __name__=="__main__":
         args_ma = get_MA_args()
         ma = MultiAreaTask(args_ma)
         ma.Get_Multi_Area_Tasks_Yolo_Txt_Labels()
+
+    if Get_VPA:
+        args_vpa = get_VPA_args()
+        vpa = VPA(args_vpa)
+        vpa.Get_VPA_Yolo_Txt_Labels()
 
 

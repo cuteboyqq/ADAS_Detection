@@ -5,10 +5,10 @@ import cv2
 
 ## =======Set parameters for all get_XXX_args()==================================================
 SHOW_IMAGE = False
-SAVE_IMAGE = True
-DATA_NUM = 70000
-DATA_TYPE = "train"
-IMG_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.8/images/100k/train"
+SAVE_IMAGE = False
+DATA_NUM = 10000
+DATA_TYPE = "val"
+IMG_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.8/images/100k/val"
 SAVE_TXT_DIR = "/home/ali/Projects/datasets/BDD100K_0.8_Train_VLA_DCA_DUA3_label_Txt_2023-12-29-Test-------------------------"
 DATA_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.8"
 VLA_LABEL = 12
@@ -21,19 +21,24 @@ DLA_LEFT_LABEL = 18
 DLA_RIGHT_LABEL = 19
 ## ===============Parsing detection folder================================================================================
 DCA_PARSE_DET_FOLDER  = "detection-VLA"
-VPA_PARSE_DET_FOLDER  = "detection-VLA-DCA"
+'''2023-12-29 parsing step 2'''
+VPA_PARSE_DET_FOLDER  = "detection-VLA-DCA-DUA3"
 DUA_PARSE_DET_FOLDER  = "detection-VLA-DCA-VPA"
 DLA_PARSE_DET_FOLDER = "detection-VLA-DCA-VPA-DUA"
+'''2023-12-29 parsing step 1'''
 MA_PARSE_DET_FOLDER = "detection-ori"
 
-DCA_SAVE_TXT_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.8/labels/detection-VLA-DCA/train"
-VPA_SAVE_TXT_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.8/labels/detection-VLA-DCA-VPA/train"
-DUA_SAVE_TXT_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.8/labels/detection-VLA-DCA-VPA-DUA/train"
-MA_SAVE_TXT_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.8/labels/detection-VLA-DCA-DUA3/train"
+DCA_SAVE_TXT_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.8/labels/detection-VLA-DCA/val"
+'''2023-12-29 parsing step 2'''
+VPA_SAVE_TXT_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.8/labels/detection-VLA-DCA-DUA3-VPA/val"
+DUA_SAVE_TXT_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.8/labels/detection-VLA-DCA-VPA-DUA/val"
+'''2023-12-29 parsing step 1'''
+MA_SAVE_TXT_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.8/labels/detection-VLA-DCA-VPA-DUA3/val"
 
 ## =================MA Multi Area Task=========================================================================================
-ENABLE_VLA = False
-ENABLE_DCA = False
+ENABLE_VLA = True
+ENABLE_DCA = True
+ENABLE_VPA = True
 ENABLE_DUA_UP = True
 ENABLE_DUA_MID = True
 ENABLE_DUA_DOWN = True
@@ -71,6 +76,7 @@ def get_VLA_args():
     ## ========================MA parameters=====================================================================
     parser.add_argument('-enableval','--enable-vla',type=bool,help='enable VLA',default=ENABLE_VLA)
     parser.add_argument('-enabledca','--enable-dca',type=bool,help='enable DCA',default=ENABLE_DCA)
+    parser.add_argument('-enablevpa','--enable-vpa',type=bool,help='enable VPA',default=ENABLE_VPA)
     parser.add_argument('-enableduaup','--enable-duaup',type=bool,help='enable DUA up',default=ENABLE_DUA_UP)
     parser.add_argument('-enableduamid','--enable-duamid',type=bool,help='enable DUA mid',default=ENABLE_DUA_MID)
     parser.add_argument('-enableduadown','--enable-duadown',type=bool,help='enable DUA down',default=ENABLE_DUA_DOWN)
@@ -124,6 +130,7 @@ def get_DCA_args():
     ## ========================MA parameters=====================================================================
     parser.add_argument('-enableval','--enable-vla',type=bool,help='enable VLA',default=ENABLE_VLA)
     parser.add_argument('-enabledca','--enable-dca',type=bool,help='enable DCA',default=ENABLE_DCA)
+    parser.add_argument('-enablevpa','--enable-vpa',type=bool,help='enable VPA',default=ENABLE_VPA)
     parser.add_argument('-enableduaup','--enable-duaup',type=bool,help='enable DUA up',default=ENABLE_DUA_UP)
     parser.add_argument('-enableduamid','--enable-duamid',type=bool,help='enable DUA mid',default=ENABLE_DUA_MID)
     parser.add_argument('-enableduadown','--enable-duadown',type=bool,help='enable DUA down',default=ENABLE_DUA_DOWN)
@@ -179,6 +186,7 @@ def get_VPA_args():
     ## ========================MA parameters=====================================================================
     parser.add_argument('-enableval','--enable-vla',type=bool,help='enable VLA',default=ENABLE_VLA)
     parser.add_argument('-enabledca','--enable-dca',type=bool,help='enable DCA',default=ENABLE_DCA)
+    parser.add_argument('-enablevpa','--enable-vpa',type=bool,help='enable VPA',default=ENABLE_VPA)
     parser.add_argument('-enableduaup','--enable-duaup',type=bool,help='enable DUA up',default=ENABLE_DUA_UP)
     parser.add_argument('-enableduamid','--enable-duamid',type=bool,help='enable DUA mid',default=ENABLE_DUA_MID)
     parser.add_argument('-enableduadown','--enable-duadown',type=bool,help='enable DUA down',default=ENABLE_DUA_DOWN)
@@ -232,6 +240,7 @@ def get_DUA_args():
     ## ========================MA parameters=====================================================================
     parser.add_argument('-enableval','--enable-vla',type=bool,help='enable VLA',default=ENABLE_VLA)
     parser.add_argument('-enabledca','--enable-dca',type=bool,help='enable DCA',default=ENABLE_DCA)
+    parser.add_argument('-enablevpa','--enable-vpa',type=bool,help='enable VPA',default=ENABLE_VPA)
     parser.add_argument('-enableduaup','--enable-duaup',type=bool,help='enable DUA up',default=ENABLE_DUA_UP)
     parser.add_argument('-enableduamid','--enable-duamid',type=bool,help='enable DUA mid',default=ENABLE_DUA_MID)
     parser.add_argument('-enableduadown','--enable-duadown',type=bool,help='enable DUA down',default=ENABLE_DUA_DOWN)
@@ -286,6 +295,7 @@ def get_DLA_args():
     ## ========================MA parameters=====================================================================
     parser.add_argument('-enableval','--enable-vla',type=bool,help='enable VLA',default=ENABLE_VLA)
     parser.add_argument('-enabledca','--enable-dca',type=bool,help='enable DCA',default=ENABLE_DCA)
+    parser.add_argument('-enablevpa','--enable-vpa',type=bool,help='enable VPA',default=ENABLE_VPA)
     parser.add_argument('-enableduaup','--enable-duaup',type=bool,help='enable DUA up',default=ENABLE_DUA_UP)
     parser.add_argument('-enableduamid','--enable-duamid',type=bool,help='enable DUA mid',default=ENABLE_DUA_MID)
     parser.add_argument('-enableduadown','--enable-duadown',type=bool,help='enable DUA down',default=ENABLE_DUA_DOWN)
@@ -340,6 +350,7 @@ def get_MA_args():
     ## ========================MA parameters=====================================================================
     parser.add_argument('-enableval','--enable-vla',type=bool,help='enable VLA',default=ENABLE_VLA)
     parser.add_argument('-enabledca','--enable-dca',type=bool,help='enable DCA',default=ENABLE_DCA)
+    parser.add_argument('-enablevpa','--enable-vpa',type=bool,help='enable VPA',default=ENABLE_VPA)
     parser.add_argument('-enableduaup','--enable-duaup',type=bool,help='enable DUA up',default=ENABLE_DUA_UP)
     parser.add_argument('-enableduamid','--enable-duamid',type=bool,help='enable DUA mid',default=ENABLE_DUA_MID)
     parser.add_argument('-enableduadown','--enable-duadown',type=bool,help='enable DUA down',default=ENABLE_DUA_DOWN)

@@ -53,9 +53,22 @@ class MultiAreaTask(BaseDataset):
                 success = 1
                 continue
                       
-            VLA_xywh,DCA_xywh,DUA_xywh_up,DUA_xywh_middle,DUA_xywh_down,im_h,im_w = self.Get_Multi_Area(im_path_list[i],return_types=1) 
+            VLA_xywh,DCA_xywh,DUA_xywh_up,DUA_xywh_middle,DUA_xywh_down,Up,Down,im_h,im_w = self.Get_Multi_Area(im_path_list[i],return_types=1) 
 
-            success = self.Add_Multi_Area_Yolo_Txt_Label(VLA_xywh,DCA_xywh,DUA_xywh_up,DUA_xywh_middle,DUA_xywh_down,detection_path,h,w,im_path_list[i])
+
+            if Down[0] is not None and Down[1] is not None and Up[0] is not None and Up[1] is not None \
+                and isinstance(Down[0],int)\
+                and isinstance(Down[1],int)\
+                and isinstance(Up[0],int)\
+                and isinstance(Up[1],int):
+                VP_x,VP_y,New_W,New_H = self.Get_VPA(im_path_list[i],Up,Down) # Up:(1,2,3,4,5) Down:(1,2,3,4) 
+          
+                x, y  = VP_x, VP_y
+                VPA_xywh = (VP_x,VP_y,New_W,New_H)
+            else:
+                VPA_xywh = (None,None,None,None)
+
+            success = self.Add_Multi_Area_Yolo_Txt_Label(VLA_xywh,DCA_xywh,VPA_xywh,DUA_xywh_up,DUA_xywh_middle,DUA_xywh_down,detection_path,h,w,im_path_list[i])
     
 
 
@@ -107,12 +120,14 @@ class MultiAreaTask(BaseDataset):
             if not os.path.exists(detection_path):
                 print(f"{detection_path} is not exists !! PASS~~~")
                 if return_types==1:
-                    return (None,None,None,None),(None,None,None,None),(None,None,None,None),(None,None,None,None),(None,None,None,None),None,None
+                    return (None,None,None,None),(None,None,None,None),(None,None,None,None),(None,None,None,None),(None,None,None,None),\
+                        (None,None,None),(None,None,None,None,None),None,None
                 else:
                     return (None,None,None)
         else:
             if return_types==1:
-                return (None,None,None,None),(None,None,None,None),(None,None,None,None),(None,None,None,None),(None,None,None,None),None,None
+                return (None,None,None,None),(None,None,None,None),(None,None,None,None),(None,None,None,None),(None,None,None,None),\
+                        (None,None,None),(None,None,None,None,None),None,None
             else:
                 return (None,None,None)
             
@@ -123,7 +138,7 @@ class MultiAreaTask(BaseDataset):
             # #(Left_M_X,Right_M_X,Search_M_line_H,VL_Y),h,w
             # DUA_middle,h,w = self.Get_DUA_XYWH(im_path,return_type = 2, w_min=50, w_max=200, h_min=40, h_max=80,force_show_im=False)
             # DUA_up,h,w = self.Get_DUA_XYWH(im_path,return_type = 2, w_min=50, w_max=200, h_min=20, h_max=40,force_show_im=False)
-            VLA_xywh,DCA_xywh,DUA_up,DUA_middle,DUA_down,h,w = self.Get_Multi_Area_XYWH(im_path,return_type=2, h_upper=(20,40), h_middel=(40,80), h_down=(80,140),force_show_im=False)
+            VLA_xywh,DCA_xywh,DUA_up,DUA_middle,DUA_down,Up,Down,h,w = self.Get_Multi_Area_XYWH(im_path,return_type=2, h_upper=(20,40), h_middel=(40,80), h_down=(80,140),force_show_im=False)
             if DUA_down[0] is not None:
                 left_x = DUA_down[0]
                 right_x = DUA_down[1]
@@ -235,24 +250,26 @@ class MultiAreaTask(BaseDataset):
                 cv2.waitKey()
         else:
             if return_types==1:
-                return (None,None,None,None),(None,None,None,None),(None,None,None,None),(None,None,None,None),(None,None,None,None),None,None
+                return (None,None,None,None),(None,None,None,None),(None,None,None,None),(None,None,None,None),(None,None,None,None),\
+                        (None,None,None),(None,None,None,None,None),None,None
             else:
                 return (None,None,None)
             
 
-        return VLA_xywh,DCA_xywh,DUA_xywh_up,DUA_xywh_middle,DUA_xywh_down,im_h,im_w
+        return VLA_xywh,DCA_xywh,DUA_xywh_up,DUA_xywh_middle,DUA_xywh_down,Up,Down,im_h,im_w
         return NotImplemented
 
 
 
     
-    def Add_Multi_Area_Yolo_Txt_Label(self,VLA_xywh,DCA_xywh,DUA_xywh_up,DUA_xywh_middle,DUA_xywh_down,detection_path,h,w,im_path):
+    def Add_Multi_Area_Yolo_Txt_Label(self,VLA_xywh,DCA_xywh,VPA_xywh,DUA_xywh_up,DUA_xywh_middle,DUA_xywh_down,detection_path,h,w,im_path):
         success = 0
         im_w = w
         im_h = h
         # print(f"im_w={im_w},im_h ={im_h}")
         VLA_lxywh = None
         DCA_lxywh = None
+        VPA_lxywh = None
         DUA_lxywh_up = None
         DUA_lxywh_middle = None
         DUA_lxywh_down = None
@@ -268,6 +285,13 @@ class MultiAreaTask(BaseDataset):
             xywh_dca_not_None = True
         else:
             xywh_dca_not_None = False
+
+        
+        xywh_vpa_not_None = True
+        if VPA_xywh[0] is not None and VPA_xywh[1] is not None:
+            xywh_vpa_not_None = True
+        else:
+            xywh_vpa_not_None = False
 
         
         xywh_up_not_None = True
@@ -323,6 +347,22 @@ class MultiAreaTask(BaseDataset):
                             + str(y_dca) + " " \
                             + str(w_dca) + " " \
                             + str(h_dca)
+            
+            if xywh_vpa_not_None==True:
+                # middle VPA bounding box
+                # print(f"xywh_m[0] = {xywh_m[0]}, xywh_m[1]={xywh_m[1]}, xywh_m[2]={xywh_m[2]}. xywh_m[3]={xywh_m[3]}")
+                # print(f"w={w}, h={h}")
+                x_vpa = float((int(float(VPA_xywh[0]/im_w)*1000000))/1000000)
+                y_vpa = float((int(float(VPA_xywh[1]/im_h)*1000000))/1000000)
+                w_vpa = float((int(float(VPA_xywh[2]/im_w)*1000000))/1000000)
+                h_vpa = float((int(float(VPA_xywh[3]/im_h)*1000000))/1000000)
+                la_vpa = self.vpa_label
+                # print(f"la = {la}")
+                VPA_lxywh = str(la_vpa) + " " \
+                            + str(x_vpa) + " " \
+                            + str(y_vpa) + " " \
+                            + str(w_vpa) + " " \
+                            + str(h_vpa)
             
             if xywh_up_not_None==True:
                 # middle VPA bounding box
@@ -400,13 +440,18 @@ class MultiAreaTask(BaseDataset):
                 with open(save_label_path,'a') as f:
                     f.write(DCA_lxywh)
                     f.write("\n")
+            
+            if VPA_lxywh is not None and self.enable_vpa is True:
+                with open(save_label_path,'a') as f:
+                    f.write(VPA_lxywh)
+                    f.write("\n")
 
             if DUA_lxywh_up is not None and self.enable_duaup is True:
                 # Add VPA Middle label into Yolo label.txt
                 with open(save_label_path,'a') as f:
                     f.write(DUA_lxywh_up)
                     f.write("\n")
-                    
+
             if DUA_lxywh_middle is not None and self.enable_duamid is True:
                 with open(save_label_path,'a') as f:
                     f.write(DUA_lxywh_middle)
@@ -769,4 +814,6 @@ class MultiAreaTask(BaseDataset):
             DUA_down = (Left_Down_X,Right_Down_X,Search_Down_line_H,VL_Y)
             VLA_xywh = (VLA_X,VLA_Y,VLA_W,VLA_H)
             DCA_xywh = (DCA_X,DCA_Y,DCA_W,DCA_H)
-            return VLA_xywh,DCA_xywh,DUA_up,DUA_mid,DUA_down,h,w
+            Up = (Left_Up_X,Right_Up_X,Search_Up_line_H)
+            Down = (Left_DCA_X,Right_DCA_X,Search_DCA_line_H,VL_X,VL_Y)
+            return VLA_xywh,DCA_xywh,DUA_up,DUA_mid,DUA_down,Up,Down,h,w

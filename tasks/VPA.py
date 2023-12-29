@@ -108,8 +108,8 @@ class VPA(BaseDataset):
             if DCA_lxywh is not None:
                 # Add DCA label into Yolo label.txt
                 with open(save_label_path,'a') as f:
-                    f.write("\n")
                     f.write(DCA_lxywh)
+                    f.write("\n")
 
             # print(f"{la}:{x}:{y}:{w}:{h}")
             success = 1

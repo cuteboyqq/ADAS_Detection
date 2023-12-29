@@ -6,13 +6,15 @@ import cv2
 class BaseDataset:
 
     def __init__(self,args):
-        
+
         ## Multi Area Task (MA) parameters
         self.enable_vla = args.enable_vla
         self.enable_dca = args.enable_dca
+        self.enable_vpa = args.enable_vpa
         self.enable_duaup = args.enable_duaup
         self.enable_duamid = args.enable_duamid
         self.enable_duadown = args.enable_duadown
+
 
         ## data directory
         self.save_dir = args.save_dir
