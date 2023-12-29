@@ -136,7 +136,7 @@ class VLA(BaseDataset):
                  + str(h)
         with open(save_txt_path,'a') as f:
             # Add VLA(Vanish Line Area Bounding Box) l x y w h
-            f.write("\n")
+            #f.write("\n")
             f.write(lxywh)
         
         success = 1

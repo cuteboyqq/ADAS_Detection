@@ -35,7 +35,7 @@ class DUA(BaseDataset):
         min_final_2 = None
         
         for i in range(final_wanted_img_count):
-            drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path_list[i],type=self.data_type,detect_folder=DETECTTION_FOLDER)
+            drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path_list[i],type=self.data_type,detect_folder=self.det_folder)
             print(f"{i}:{im_path_list[i]}")
             im = cv2.imread(im_path_list[i])
             h,w = im.shape[0],im.shape[1]
@@ -134,7 +134,7 @@ class DUA(BaseDataset):
 
         '''
         if os.path.exists(im_path):
-            drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type,detect_folder=DETECTTION_FOLDER)
+            drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type,detect_folder=self.det_folder)
             im_h = 0
             im_w = 0
             if os.path.exists(drivable_path):
@@ -447,7 +447,7 @@ class DUA(BaseDataset):
 
         '''
         if os.path.exists(im_path):
-            drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type,detect_folder=DETECTTION_FOLDER)
+            drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type,detect_folder=self.det_folder)
             im_h = 0
             im_w = 0
             if os.path.exists(drivable_path):
@@ -860,7 +860,7 @@ class DUA(BaseDataset):
                     VL_X          : min vehicle coordinate x
                     VL_Y          : mi coordinate y
         '''
-        drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type,detect_folder=DETECTTION_FOLDER)
+        drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type,detect_folder=self.det_folder)
         h = 0
         w = 0
         if os.path.exists(drivable_path):
@@ -1142,7 +1142,7 @@ class DUA(BaseDataset):
                     VL_X          : min vehicle coordinate x
                     VL_Y          : mi coordinate y
         '''
-        drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type,detect_folder=DETECTTION_FOLDER)
+        drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type,detect_folder=self.det_folder)
         h = 0
         w = 0
         if os.path.exists(drivable_path):
@@ -1299,7 +1299,7 @@ class DUA(BaseDataset):
         2: BackGround
         '''
         
-        drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type,detect_folder=DETECTTION_FOLDER)
+        drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type,detect_folder=self.det_folder)
 
         h = 0
         w = 0
@@ -1466,7 +1466,7 @@ class DUA(BaseDataset):
                     VL_Y          : mi coordinate y
         '''
         
-        drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type,detect_folder=DETECTTION_FOLDER)
+        drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type,detect_folder=self.det_folder)
 
         h = 0
         w = 0

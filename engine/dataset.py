@@ -6,13 +6,22 @@ import cv2
 class BaseDataset:
 
     def __init__(self,args):
+        
+        ## Multi Area Task (MA) parameters
+        self.enable_vla = args.enable_vla
+        self.enable_dca = args.enable_dca
+        self.enable_duaup = args.enable_duaup
+        self.enable_duamid = args.enable_duamid
+        self.enable_duadown = args.enable_duadown
 
         ## data directory
-        self.dataset_dir =  args.dataset
         self.save_dir = args.save_dir
         self.im_dir = args.im_dir
         self.dataset_dir = args.data_dir
         
+        ## Pasre detection folder
+        self.det_folder = args.det_folder
+
         ## split crop image detail
         self.split_num = args.split_num
         self.split_height = args.split_height
@@ -748,11 +757,6 @@ class BaseDataset:
 
             ## 4. Get bounding box
         
-
-
-
-
-
             Search_line_H = int((left_temp_Y+right_temp_Y)/2.0)
 
             # Left_X = w

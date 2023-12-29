@@ -167,7 +167,7 @@ class DLA(BaseDataset):
         # print(f"xywh[0]:{xywh[0]},xywh[1]:{xywh[1]},xywh[2]:{xywh[2]},xywh[3]:{xywh[3]},w:{w},h:{h}")
         im_w = w
         im_h = h
-        if os.path.exists(detection_path) and w is not 0 and h is not 0:
+        if os.path.exists(detection_path) and w != 0 and h != 0:
             if xywh_left_not_None == True:
                 x = float((int(float(xywh_left[0]/im_w)*1000000))/1000000)
                 y = float((int(float(xywh_left[1]/im_h)*1000000))/1000000)

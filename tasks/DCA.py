@@ -33,7 +33,7 @@ class DCA(BaseDataset):
         min_final_2 = None
         
         for i in range(final_wanted_img_count):
-            drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path_list[i],type=self.data_type)
+            drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path_list[i],type=self.data_type,detect_folder=self.det_folder)
             print(f"{i}:{im_path_list[i]}")
             im = cv2.imread(im_path_list[i])
             h,w = im.shape[0],im.shape[1]
@@ -110,7 +110,7 @@ class DCA(BaseDataset):
         2: BackGround
         '''
         
-        drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type)
+        drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type,detect_folder=self.det_folder)
 
         h = 0
         w = 0
