@@ -120,13 +120,13 @@ class MultiAreaTask(BaseDataset):
             if not os.path.exists(detection_path):
                 print(f"{detection_path} is not exists !! PASS~~~")
                 if return_types==1:
-                    return (None,None,None,None),(None,None,None,None),(None,None,None,None),(None,None,None,None),(None,None,None,None),\
+                    return (None,None,None,None),(None,None,None,None),(None,None,None,None),(None,None,None,None),(None,None,None,None),(None,None,None,None),\
                         (None,None,None),(None,None,None,None,None),None,None
                 else:
                     return (None,None,None)
         else:
             if return_types==1:
-                return (None,None,None,None),(None,None,None,None),(None,None,None,None),(None,None,None,None),(None,None,None,None),\
+                return (None,None,None,None),(None,None,None,None),(None,None,None,None),(None,None,None,None),(None,None,None,None),(None,None,None,None),\
                         (None,None,None),(None,None,None,None,None),None,None
             else:
                 return (None,None,None)
@@ -585,7 +585,8 @@ class MultiAreaTask(BaseDataset):
             if return_type==1:
                 return (None,None,None,None),(None,None,None,None),(None,None,None,None),None,None
             else:
-                return (None,None,None,None),(None,None,None,None),(None,None,None,None),None,None
+                return (None,None,None,None),(None,None,None,None),(None,None,None,None),(None,None,None,None), 
+                (None,None,None,None),(None,None,None,None),(None,None,None),(None,None,None,None,None),None,None
 
         min_final,index = self.Get_Min_y_In_Drivable_Area(drivable_path)    
         VL = self.Find_Min_Y_Among_All_Vehicle_Bounding_Boxes_Ver2(min_final,detection_path,h,w)
@@ -929,7 +930,8 @@ class MultiAreaTask(BaseDataset):
             if return_type==1:
                 return (None,None,None,None),(None,None,None,None),(None,None,None,None),None,None
             if return_type==2:
-                return (None,None,None,None),(None,None,None,None),(None,None,None,None),(None,None,None,None),None,None
+                return (None,None,None,None),(None,None,None,None),(None,None,None,None),(None,None,None,None), 
+                (None,None,None,None),(None,None,None,None),(None,None,None),(None,None,None,None,None),None,None
         
         # print(f"Middle_X:{Middle_X},Middle_Y:{Middle_Y},DCA_W:{DCA_W},DCA_H:{DCA_H}")
         if return_type==1:
