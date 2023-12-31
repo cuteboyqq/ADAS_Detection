@@ -53,7 +53,7 @@ class MultiAreaTask(BaseDataset):
                 success = 1
                 continue
                       
-            VLA_xywh,DCA_xywh,DUA_xywh_up,DUA_xywh_middle,DUA_xywh_down,Up,Down,im_h,im_w = self.Get_Multi_Area(im_path_list[i],return_types=1) 
+            VLA_xywh,DCA_xywh,DUA_xywh_upest,DUA_xywh_up,DUA_xywh_middle,DUA_xywh_down,Up,Down,im_h,im_w = self.Get_Multi_Area(im_path_list[i],return_types=1) 
 
 
             if Down[0] is not None and Down[1] is not None and Up[0] is not None and Up[1] is not None \
@@ -68,7 +68,7 @@ class MultiAreaTask(BaseDataset):
             else:
                 VPA_xywh = (None,None,None,None)
 
-            success = self.Add_Multi_Area_Yolo_Txt_Label(VLA_xywh,DCA_xywh,VPA_xywh,DUA_xywh_up,DUA_xywh_middle,DUA_xywh_down,detection_path,h,w,im_path_list[i])
+            success = self.Add_Multi_Area_Yolo_Txt_Label(VLA_xywh,DCA_xywh,VPA_xywh,DUA_xywh_upest,DUA_xywh_up,DUA_xywh_middle,DUA_xywh_down,detection_path,h,w,im_path_list[i])
     
 
 
@@ -138,8 +138,14 @@ class MultiAreaTask(BaseDataset):
             # #(Left_M_X,Right_M_X,Search_M_line_H,VL_Y),h,w
             # DUA_middle,h,w = self.Get_DUA_XYWH(im_path,return_type = 2, w_min=50, w_max=200, h_min=40, h_max=80,force_show_im=False)
             # DUA_up,h,w = self.Get_DUA_XYWH(im_path,return_type = 2, w_min=50, w_max=200, h_min=20, h_max=40,force_show_im=False)
-            VLA_xywh,DCA_xywh,DUA_up,DUA_middle,DUA_down,Up,Down,h,w = self.Get_Multi_Area_XYWH(im_path,return_type=2, h_upper=(20,40), h_middel=(40,80), h_down=(80,140),force_show_im=False)
-            if DUA_down[0] is not None:
+            VLA_xywh,DCA_xywh,DUA_upest,DUA_up,DUA_middle,DUA_down,Up,Down,h,w = self.Get_Multi_Area_XYWH(im_path,
+                                                                                                            return_type=2,
+                                                                                                            h_upperest=(8,15),
+                                                                                                            h_upper=(20,40),
+                                                                                                            h_middel=(40,80),
+                                                                                                            h_down=(80,140),
+                                                                                                            force_show_im=False)
+            if DUA_down[0] is not None and DUA_down[3] is not None:
                 left_x = DUA_down[0]
                 right_x = DUA_down[1]
                 
@@ -153,7 +159,7 @@ class MultiAreaTask(BaseDataset):
             else:
                 DUA_xywh_down = (None,None,None,None)
 
-            if DUA_middle[0] is not None:
+            if DUA_middle[0] is not None and DUA_middle[3] is not None:
                 left_x = DUA_middle[0]
                 right_x = DUA_middle[1]
                 
@@ -168,7 +174,7 @@ class MultiAreaTask(BaseDataset):
                 DUA_xywh_middle = (None,None,None,None)
 
 
-            if DUA_up[0] is not None:
+            if DUA_up[0] is not None  and DUA_up[3] is not None:
                 left_x = DUA_up[0]
                 right_x = DUA_up[1]
                 
@@ -181,6 +187,20 @@ class MultiAreaTask(BaseDataset):
                 DUA_xywh_up = (x,y,w,h)
             else:
                 DUA_xywh_up = (None,None,None,None)
+
+            if DUA_upest[0] is not None  and DUA_upest[3] is not None:
+                left_x = DUA_upest[0]
+                right_x = DUA_upest[1]
+                
+                y_down = DUA_upest[2]
+                VL_Y = DUA_upest[3]
+                x = int((left_x + right_x) / 2.0)
+                y = int(VL_Y)
+                w = int(right_x - left_x)
+                h = int(abs(int(y_down - VL_Y))*2.0)
+                DUA_xywh_upest = (x,y,w,h)
+            else:
+                DUA_xywh_upest = (None,None,None,None)
 
             if self.show_im and return_types==1:
                 if DUA_down[0] is not None:
@@ -243,7 +263,17 @@ class MultiAreaTask(BaseDataset):
                     cv2.rectangle(im_dri_cm, p1, p2, (50,200,127) , 3, cv2.LINE_AA)
                     cv2.rectangle(im, p1, p2, (50,200,127) , 3, cv2.LINE_AA)
 
-              
+                if DUA_upest[0] is not None:
+                    left_x = DUA_upest[0]
+                    right_x = DUA_upest[1]
+                    
+                    y_down = DUA_upest[2]
+                    VL_Y = DUA_upest[3]
+                    h = int(int(abs(y_down-VL_Y))*2.0)
+                    p1 =(left_x,y_down)
+                    p2 = (right_x,VL_Y-int(h/2.0))
+                    cv2.rectangle(im_dri_cm, p1, p2, (0,120,255) , 3, cv2.LINE_AA)
+                    cv2.rectangle(im, p1, p2, (0,120,255) , 3, cv2.LINE_AA)
 
                 cv2.imshow("drivable image",im_dri_cm)
                 cv2.imshow("image",im)
@@ -256,13 +286,20 @@ class MultiAreaTask(BaseDataset):
                 return (None,None,None)
             
 
-        return VLA_xywh,DCA_xywh,DUA_xywh_up,DUA_xywh_middle,DUA_xywh_down,Up,Down,im_h,im_w
+        return VLA_xywh,DCA_xywh,DUA_xywh_upest,DUA_xywh_up,DUA_xywh_middle,DUA_xywh_down,Up,Down,im_h,im_w
         return NotImplemented
 
 
 
     
-    def Add_Multi_Area_Yolo_Txt_Label(self,VLA_xywh,DCA_xywh,VPA_xywh,DUA_xywh_up,DUA_xywh_middle,DUA_xywh_down,detection_path,h,w,im_path):
+    def Add_Multi_Area_Yolo_Txt_Label(self,VLA_xywh,
+                                        DCA_xywh,
+                                        VPA_xywh,
+                                        DUA_xywh_upest,
+                                        DUA_xywh_up,
+                                        DUA_xywh_middle,
+                                        DUA_xywh_down,
+                                        detection_path,h,w,im_path):
         success = 0
         im_w = w
         im_h = h
@@ -270,6 +307,7 @@ class MultiAreaTask(BaseDataset):
         VLA_lxywh = None
         DCA_lxywh = None
         VPA_lxywh = None
+        DUA_lxywh_upest = None
         DUA_lxywh_up = None
         DUA_lxywh_middle = None
         DUA_lxywh_down = None
@@ -293,6 +331,11 @@ class MultiAreaTask(BaseDataset):
         else:
             xywh_vpa_not_None = False
 
+        xywh_upest_not_None = True
+        if DUA_xywh_upest[0] is not None and DUA_xywh_upest[1] is not None:
+            xywh_upest_not_None = True
+        else:
+            xywh_upest_not_None = False
         
         xywh_up_not_None = True
         if DUA_xywh_up[0] is not None and DUA_xywh_up[1] is not None:
@@ -364,6 +407,22 @@ class MultiAreaTask(BaseDataset):
                             + str(w_vpa) + " " \
                             + str(h_vpa)
             
+            if xywh_upest_not_None==True:
+                # middle VPA bounding box
+                # print(f"xywh_m[0] = {xywh_m[0]}, xywh_m[1]={xywh_m[1]}, xywh_m[2]={xywh_m[2]}. xywh_m[3]={xywh_m[3]}")
+                # print(f"w={w}, h={h}")
+                x_upest = float((int(float(DUA_xywh_upest[0]/im_w)*1000000))/1000000)
+                y_upest = float((int(float(DUA_xywh_upest[1]/im_h)*1000000))/1000000)
+                w_upest = float((int(float(DUA_xywh_upest[2]/im_w)*1000000))/1000000)
+                h_upest = float((int(float(DUA_xywh_upest[3]/im_h)*1000000))/1000000)
+                la_upest = self.dua_upest_label
+                # print(f"la = {la}")
+                DUA_lxywh_upest = str(la_upest) + " " \
+                            + str(x_upest) + " " \
+                            + str(y_upest) + " " \
+                            + str(w_upest) + " " \
+                            + str(h_upest)
+
             if xywh_up_not_None==True:
                 # middle VPA bounding box
                 # print(f"xywh_m[0] = {xywh_m[0]}, xywh_m[1]={xywh_m[1]}, xywh_m[2]={xywh_m[2]}. xywh_m[3]={xywh_m[3]}")
@@ -446,6 +505,12 @@ class MultiAreaTask(BaseDataset):
                     f.write(VPA_lxywh)
                     f.write("\n")
 
+            if DUA_lxywh_upest is not None and self.enable_duaupest is True:
+                # Add VPA Middle label into Yolo label.txt
+                with open(save_label_path,'a') as f:
+                    f.write(DUA_lxywh_upest)
+                    f.write("\n")
+
             if DUA_lxywh_up is not None and self.enable_duaup is True:
                 # Add VPA Middle label into Yolo label.txt
                 with open(save_label_path,'a') as f:
@@ -473,7 +538,14 @@ class MultiAreaTask(BaseDataset):
 
         return success
 
-    def Get_Multi_Area_XYWH(self,im_path,return_type=1, h_upper=(20,40), h_middel=(40,80), h_down=(80,140),force_show_im=True):
+    def Get_Multi_Area_XYWH(self,
+                            im_path,
+                            return_type=1,
+                            h_upperest=(0,20),
+                            h_upper=(20,40), 
+                            h_middel=(40,80), 
+                            h_down=(80,140),
+                            force_show_im=True):
         '''
         func: Get Multi Area (DCA,VLA,...,etc) XYWH 
 
@@ -549,7 +621,12 @@ class MultiAreaTask(BaseDataset):
             find_top_y = False
             DCA_W = 0
             DCA_H = 0
-
+            # initialize upper parameters
+            main_lane_width_upest = 0
+            main_lane_upperest_width = 9999
+            Final_Upest_Left_X = 0
+            Final_Upest_Right_X = 0
+            Search_Upest_line_H = 0
 
             # initialize upper parameters
             main_lane_width_up = 0
@@ -602,6 +679,21 @@ class MultiAreaTask(BaseDataset):
                 # print(f"find_left_tmp_x:{find_left_tmp_x}")
                 # print(f"find_right_tmp_x:{find_right_tmp_x}")
                 tmp_main_lane_width = abs(Right_tmp_X - Left_tmp_X)
+
+                '''
+                Find the upperest main lane drivable area width, 
+                and not at the vanish point
+                '''
+                if tmp_main_lane_width>main_lane_width_up\
+                    and find_left_tmp_x==True \
+                    and find_right_tmp_x==True \
+                    and abs(i-Top_Y)>h_upperest[0] and abs(i-Top_Y) < h_upperest[1]:
+                    
+                    main_lane_width_upest = tmp_main_lane_width
+                    Final_Upest_Left_X = Left_tmp_X
+                    Final_Upest_Right_X = Right_tmp_X
+                    Search_Upest_line_H = i
+
 
 
                 '''
@@ -657,6 +749,19 @@ class MultiAreaTask(BaseDataset):
                     Final_DCA_Left_X = Left_tmp_X
                     Final_DCA_Right_X = Right_tmp_X
                     Search_DCA_line_H = i
+
+            '''
+            Get Upperest bounding box "
+            1. left x
+            2. right x
+            3. lower bound y 
+            '''
+            if Final_Upest_Left_X==0 and Final_Upest_Right_X==0:
+                Left_Upest_X = None
+                Right_Upest_X = None
+            else:
+                Left_Upest_X = Final_Upest_Left_X
+                Right_Upest_X = Final_Upest_Right_X
 
 
             '''
@@ -718,9 +823,27 @@ class MultiAreaTask(BaseDataset):
                 # print(f"line Y :{Search_line_H} Left_X:{Left_X}, Right_X:{Right_X} Middle_X:{Middle_X}")
 
             '''
+            Get Upperest DUA xywh
+            '''
+            if Left_Upest_X is not None and Right_Upest_X is not None \
+                and VL_Y is not None:
+                # Middle bounding box
+                DUA_Upest_X = int((Left_Upest_X + Right_Upest_X)/2.0)
+                DUA_Upest_Y = int(Search_Upest_line_H)
+                DUA_Upest_W = abs(Right_Upest_X - Left_Upest_X)
+                DUA_Upest_H = abs(int(Search_Upest_line_H - VL_Y))*2.0
+            else:
+                DUA_Upest_X = None
+                DUA_Upest_Y = None
+                DUA_Upest_W = None
+                DUA_Upest_H = None
+                Search_Upest_line_H = None
+
+            '''
             Get Upper DUA xywh
             '''
-            if Left_Up_X is not None and Right_Up_X is not None:
+            if Left_Up_X is not None and Right_Up_X is not None \
+                and VL_Y is not None:
                 # Middle bounding box
                 DUA_Up_X = int((Left_Up_X + Right_Up_X)/2.0)
                 DUA_Up_Y = int(Search_Up_line_H + VL_Y /2.0)
@@ -736,7 +859,8 @@ class MultiAreaTask(BaseDataset):
             '''
             Get Middle DUA xywh
             '''
-            if Left_Mid_X is not None and Right_Mid_X is not None:
+            if Left_Mid_X is not None and Right_Mid_X is not None \
+                and VL_Y is not None:
                 # Middle bounding box
                 DUA_Mid_X = int((Left_Mid_X + Right_Mid_X)/2.0)
                 DUA_Mid_Y = int(Search_Mid_line_H + VL_Y /2.0)
@@ -752,7 +876,8 @@ class MultiAreaTask(BaseDataset):
             '''
             Get Down DUA xywh
             '''
-            if Left_Down_X is not None and Right_Down_X is not None:
+            if Left_Down_X is not None and Right_Down_X is not None \
+                and VL_Y is not None:
                 # Middle bounding box
                 DUA_Down_X = int((Left_Down_X + Right_Down_X)/2.0)
                 DUA_Down_Y = int(Search_Down_line_H + VL_Y /2.0)
@@ -768,7 +893,8 @@ class MultiAreaTask(BaseDataset):
             '''
             Get DCA xywh
             '''
-            if Left_DCA_X is not None and Right_DCA_X is not None:
+            if Left_DCA_X is not None and Right_DCA_X is not None \
+                and VL_Y is not None:
                 # Middle bounding box
                 DCA_X = int((Left_DCA_X + Right_DCA_X)/2.0)
                 DCA_Y = int((Search_DCA_line_H + VL_Y) /2.0)
@@ -809,11 +935,16 @@ class MultiAreaTask(BaseDataset):
         if return_type==1:
             return (DUA_Up_X,DUA_Up_Y,DUA_Up_W,DUA_Up_H),(DUA_Mid_X,DUA_Mid_Y,DUA_Mid_W,DUA_Mid_H),(DUA_Down_X,DUA_Down_Y,DUA_Down_W,DUA_Down_H),h,w
         if return_type==2:
+            DUA_upest = (Left_Upest_X,Right_Upest_X,Search_Upest_line_H,VL_Y)
             DUA_up = (Left_Up_X,Right_Up_X,Search_Up_line_H,VL_Y)
             DUA_mid = (Left_Mid_X,Right_Mid_X,Search_Mid_line_H,VL_Y)
             DUA_down = (Left_Down_X,Right_Down_X,Search_Down_line_H,VL_Y)
             VLA_xywh = (VLA_X,VLA_Y,VLA_W,VLA_H)
             DCA_xywh = (DCA_X,DCA_Y,DCA_W,DCA_H)
             Up = (Left_Up_X,Right_Up_X,Search_Up_line_H)
+            # Up = (Left_Mid_X,Right_Mid_X,Search_Mid_line_H)
             Down = (Left_DCA_X,Right_DCA_X,Search_DCA_line_H,VL_X,VL_Y)
-            return VLA_xywh,DCA_xywh,DUA_up,DUA_mid,DUA_down,Up,Down,h,w
+            # Down = (Left_Mid_X,Right_Mid_X,Search_Mid_line_H,VL_X,VL_Y)
+            # Down = (Left_Down_X,Right_Down_X,Search_DCA_line_H,VL_X,VL_Y)
+            # Using DUA up and DUA mid to get vanish point 2023-12-30
+            return VLA_xywh,DCA_xywh,DUA_upest,DUA_up,DUA_mid,DUA_down,Up,Down,h,w

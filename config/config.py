@@ -6,19 +6,20 @@ import cv2
 ## =======Set parameters for all get_XXX_args()==================================================
 SHOW_IMAGE = False
 SAVE_IMAGE = False
-DATA_NUM = 10000
-DATA_TYPE = "val"
-IMG_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.8/images/100k/val"
-SAVE_TXT_DIR = "/home/ali/Projects/datasets/BDD100K_0.8_Train_VLA_DCA_DUA3_label_Txt_2023-12-29-Test-------------------------"
-DATA_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.8"
+DATA_NUM = 70000
+DATA_TYPE = "train"
+IMG_DIR = r"C:/datasets/bdd100k_data_0.9_zip/images/100k/train"
+SAVE_TXT_DIR = "/home/ali/Projects/datasets/BDD100K_0.9_Train_VLA_DCA_VPA_DUA3_label_Txt_2023-12-29-Test-------------------------"
+DATA_DIR = r"C:/datasets/bdd100k_data_0.9_zip"
 VLA_LABEL = 12
 DCA_LABEL = 13
 VPA_LABEL = 14
+DUA_UPEST_LABEL = 18
 DUA_UP_LABEL = 15
 DUA_MIDDLE_LABEL = 16
 DUA_DOWN_LABEL = 17
-DLA_LEFT_LABEL = 18
-DLA_RIGHT_LABEL = 19
+DLA_LEFT_LABEL = 19
+DLA_RIGHT_LABEL = 20
 ## ===============Parsing detection folder================================================================================
 DCA_PARSE_DET_FOLDER  = "detection-VLA"
 '''2023-12-29 parsing step 2'''
@@ -33,12 +34,13 @@ DCA_SAVE_TXT_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.8/labels/detectio
 VPA_SAVE_TXT_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.8/labels/detection-VLA-DCA-DUA3-VPA/val"
 DUA_SAVE_TXT_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.8/labels/detection-VLA-DCA-VPA-DUA/val"
 '''2023-12-29 parsing step 1'''
-MA_SAVE_TXT_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.8/labels/detection-VLA-DCA-VPA-DUA3/val"
+MA_SAVE_TXT_DIR = r"C:/datasets/bdd100k_data_0.9/labels/detection-VLA-DCA-VPA-DUA4/train"
 
 ## =================MA Multi Area Task=========================================================================================
 ENABLE_VLA = True
 ENABLE_DCA = True
 ENABLE_VPA = True
+ENABLE_DUA_UPEST = True
 ENABLE_DUA_UP = True
 ENABLE_DUA_MID = True
 ENABLE_DUA_DOWN = True
@@ -63,6 +65,7 @@ def get_VLA_args():
     parser.add_argument('-dcalabel','--dca-label',type=int,help='DCA label',default=DCA_LABEL)
     parser.add_argument('-vpalabel','--vpa-label',type=int,help='DCA label',default=VPA_LABEL)
     parser.add_argument('-duauplabel','--dua-uplabel',type=int,help='VUA up label',default=DUA_UP_LABEL)
+    parser.add_argument('-duaupestlabel','--dua-upestlabel',type=int,help='VUA upest label',default=DUA_UPEST_LABEL)
     parser.add_argument('-duamiddlelabel','--dua-middlelabel',type=int,help='VUA middle label',default=DUA_MIDDLE_LABEL)
     parser.add_argument('-duadownlabel','--dua-downlabel',type=int,help='VUA down label',default=DUA_DOWN_LABEL)
     parser.add_argument('-dlaleftlabel','--dla-leftlabel',type=int,help='DLA label',default=DLA_LEFT_LABEL)
@@ -77,6 +80,7 @@ def get_VLA_args():
     parser.add_argument('-enableval','--enable-vla',type=bool,help='enable VLA',default=ENABLE_VLA)
     parser.add_argument('-enabledca','--enable-dca',type=bool,help='enable DCA',default=ENABLE_DCA)
     parser.add_argument('-enablevpa','--enable-vpa',type=bool,help='enable VPA',default=ENABLE_VPA)
+    parser.add_argument('-enableduaupest','--enable-duaupest',type=bool,help='enable DUA upest',default=ENABLE_DUA_UPEST)
     parser.add_argument('-enableduaup','--enable-duaup',type=bool,help='enable DUA up',default=ENABLE_DUA_UP)
     parser.add_argument('-enableduamid','--enable-duamid',type=bool,help='enable DUA mid',default=ENABLE_DUA_MID)
     parser.add_argument('-enableduadown','--enable-duadown',type=bool,help='enable DUA down',default=ENABLE_DUA_DOWN)
@@ -118,6 +122,7 @@ def get_DCA_args():
     parser.add_argument('-dcalabel','--dca-label',type=int,help='DCA label',default=DCA_LABEL)
     parser.add_argument('-vpalabel','--vpa-label',type=int,help='DCA label',default=VPA_LABEL)
     parser.add_argument('-duauplabel','--dua-uplabel',type=int,help='VUA up label',default=DUA_UP_LABEL)
+    parser.add_argument('-duaupestlabel','--dua-upestlabel',type=int,help='VUA upest label',default=DUA_UPEST_LABEL)
     parser.add_argument('-duamiddlelabel','--dua-middlelabel',type=int,help='VUA middle label',default=DUA_MIDDLE_LABEL)
     parser.add_argument('-duadownlabel','--dua-downlabel',type=int,help='VUA down label',default=DUA_DOWN_LABEL)
     parser.add_argument('-dlaleftlabel','--dla-leftlabel',type=int,help='DLA label',default=DLA_LEFT_LABEL)
@@ -132,6 +137,7 @@ def get_DCA_args():
     parser.add_argument('-enabledca','--enable-dca',type=bool,help='enable DCA',default=ENABLE_DCA)
     parser.add_argument('-enablevpa','--enable-vpa',type=bool,help='enable VPA',default=ENABLE_VPA)
     parser.add_argument('-enableduaup','--enable-duaup',type=bool,help='enable DUA up',default=ENABLE_DUA_UP)
+    parser.add_argument('-enableduaupest','--enable-duaupest',type=bool,help='enable DUA upest',default=ENABLE_DUA_UPEST)
     parser.add_argument('-enableduamid','--enable-duamid',type=bool,help='enable DUA mid',default=ENABLE_DUA_MID)
     parser.add_argument('-enableduadown','--enable-duadown',type=bool,help='enable DUA down',default=ENABLE_DUA_DOWN)
     ## ========================================================================================================
@@ -175,6 +181,7 @@ def get_VPA_args():
     parser.add_argument('-dcalabel','--dca-label',type=int,help='DCA label',default=DCA_LABEL)
     parser.add_argument('-vpalabel','--vpa-label',type=int,help='DCA label',default=VPA_LABEL)
     parser.add_argument('-duauplabel','--dua-uplabel',type=int,help='VUA up label',default=DUA_UP_LABEL)
+    parser.add_argument('-duaupestlabel','--dua-upestlabel',type=int,help='VUA upest label',default=DUA_UPEST_LABEL)
     parser.add_argument('-duamiddlelabel','--dua-middlelabel',type=int,help='VUA middle label',default=DUA_MIDDLE_LABEL)
     parser.add_argument('-duadownlabel','--dua-downlabel',type=int,help='VUA down label',default=DUA_DOWN_LABEL)
     parser.add_argument('-dlaleftlabel','--dla-leftlabel',type=int,help='DLA label',default=DLA_LEFT_LABEL)
@@ -187,6 +194,7 @@ def get_VPA_args():
     parser.add_argument('-enableval','--enable-vla',type=bool,help='enable VLA',default=ENABLE_VLA)
     parser.add_argument('-enabledca','--enable-dca',type=bool,help='enable DCA',default=ENABLE_DCA)
     parser.add_argument('-enablevpa','--enable-vpa',type=bool,help='enable VPA',default=ENABLE_VPA)
+    parser.add_argument('-enableduaupest','--enable-duaupest',type=bool,help='enable DUA upest',default=ENABLE_DUA_UPEST)
     parser.add_argument('-enableduaup','--enable-duaup',type=bool,help='enable DUA up',default=ENABLE_DUA_UP)
     parser.add_argument('-enableduamid','--enable-duamid',type=bool,help='enable DUA mid',default=ENABLE_DUA_MID)
     parser.add_argument('-enableduadown','--enable-duadown',type=bool,help='enable DUA down',default=ENABLE_DUA_DOWN)
@@ -228,9 +236,10 @@ def get_DUA_args():
     parser.add_argument('-vlalabel','--vla-label',type=int,help='VLA label',default=VLA_LABEL)
     parser.add_argument('-dcalabel','--dca-label',type=int,help='DCA label',default=DCA_LABEL)
     parser.add_argument('-vpalabel','--vpa-label',type=int,help='VPA label',default=VPA_LABEL)
-    parser.add_argument('-duauplabel','--dua-uplabel',type=int,help='VUA up label',default=DUA_UP_LABEL)
-    parser.add_argument('-duamiddlelabel','--dua-middlelabel',type=int,help='VUA middle label',default=DUA_MIDDLE_LABEL)
-    parser.add_argument('-duadownlabel','--dua-downlabel',type=int,help='VUA down label',default=DUA_DOWN_LABEL)
+    parser.add_argument('-duauplabel','--dua-uplabel',type=int,help='DUA up label',default=DUA_UP_LABEL)
+    parser.add_argument('-duaupestlabel','--dua-upestlabel',type=int,help='DUA upest label',default=DUA_UPEST_LABEL)
+    parser.add_argument('-duamiddlelabel','--dua-middlelabel',type=int,help='DUA middle label',default=DUA_MIDDLE_LABEL)
+    parser.add_argument('-duadownlabel','--dua-downlabel',type=int,help='DUA down label',default=DUA_DOWN_LABEL)
     parser.add_argument('-dlaleftlabel','--dla-leftlabel',type=int,help='DLA label',default=DLA_LEFT_LABEL)
     parser.add_argument('-dlarightlabel','--dla-rightlabel',type=int,help='DLA label',default=DLA_RIGHT_LABEL)
     parser.add_argument('-saveimg','--save-img',type=bool,help='save images',default=SAVE_IMAGE)
@@ -241,6 +250,7 @@ def get_DUA_args():
     parser.add_argument('-enableval','--enable-vla',type=bool,help='enable VLA',default=ENABLE_VLA)
     parser.add_argument('-enabledca','--enable-dca',type=bool,help='enable DCA',default=ENABLE_DCA)
     parser.add_argument('-enablevpa','--enable-vpa',type=bool,help='enable VPA',default=ENABLE_VPA)
+    parser.add_argument('-enableduaupest','--enable-duaupest',type=bool,help='enable DUA upest',default=ENABLE_DUA_UPEST)
     parser.add_argument('-enableduaup','--enable-duaup',type=bool,help='enable DUA up',default=ENABLE_DUA_UP)
     parser.add_argument('-enableduamid','--enable-duamid',type=bool,help='enable DUA mid',default=ENABLE_DUA_MID)
     parser.add_argument('-enableduadown','--enable-duadown',type=bool,help='enable DUA down',default=ENABLE_DUA_DOWN)
@@ -283,6 +293,7 @@ def get_DLA_args():
     parser.add_argument('-dcalabel','--dca-label',type=int,help='DCA label',default=DCA_LABEL)
     parser.add_argument('-vpalabel','--vpa-label',type=int,help='VPA label',default=VPA_LABEL)
     parser.add_argument('-duauplabel','--dua-uplabel',type=int,help='VUA up label',default=DUA_UP_LABEL)
+    parser.add_argument('-duaupestlabel','--dua-upestlabel',type=int,help='DUA upest label',default=DUA_UPEST_LABEL)
     parser.add_argument('-duamiddlelabel','--dua-middlelabel',type=int,help='VUA middle label',default=DUA_MIDDLE_LABEL)
     parser.add_argument('-duadownlabel','--dua-downlabel',type=int,help='VUA down label',default=DUA_DOWN_LABEL)
     parser.add_argument('-dlaleftlabel','--dla-leftlabel',type=int,help='DLA label',default=DLA_LEFT_LABEL)
@@ -296,6 +307,7 @@ def get_DLA_args():
     parser.add_argument('-enableval','--enable-vla',type=bool,help='enable VLA',default=ENABLE_VLA)
     parser.add_argument('-enabledca','--enable-dca',type=bool,help='enable DCA',default=ENABLE_DCA)
     parser.add_argument('-enablevpa','--enable-vpa',type=bool,help='enable VPA',default=ENABLE_VPA)
+    parser.add_argument('-enableduaupest','--enable-duaupest',type=bool,help='enable DUA upest',default=ENABLE_DUA_UPEST)
     parser.add_argument('-enableduaup','--enable-duaup',type=bool,help='enable DUA up',default=ENABLE_DUA_UP)
     parser.add_argument('-enableduamid','--enable-duamid',type=bool,help='enable DUA mid',default=ENABLE_DUA_MID)
     parser.add_argument('-enableduadown','--enable-duadown',type=bool,help='enable DUA down',default=ENABLE_DUA_DOWN)
@@ -338,6 +350,7 @@ def get_MA_args():
     parser.add_argument('-dcalabel','--dca-label',type=int,help='DCA label',default=DCA_LABEL)
     parser.add_argument('-vpalabel','--vpa-label',type=int,help='VPA label',default=VPA_LABEL)
     parser.add_argument('-duauplabel','--dua-uplabel',type=int,help='VUA up label',default=DUA_UP_LABEL)
+    parser.add_argument('-duaupestlabel','--dua-upestlabel',type=int,help='DUA upest label',default=DUA_UPEST_LABEL)
     parser.add_argument('-duamiddlelabel','--dua-middlelabel',type=int,help='VUA middle label',default=DUA_MIDDLE_LABEL)
     parser.add_argument('-duadownlabel','--dua-downlabel',type=int,help='VUA down label',default=DUA_DOWN_LABEL)
     parser.add_argument('-dlaleftlabel','--dla-leftlabel',type=int,help='DLA label',default=DLA_LEFT_LABEL)
@@ -351,6 +364,7 @@ def get_MA_args():
     parser.add_argument('-enableval','--enable-vla',type=bool,help='enable VLA',default=ENABLE_VLA)
     parser.add_argument('-enabledca','--enable-dca',type=bool,help='enable DCA',default=ENABLE_DCA)
     parser.add_argument('-enablevpa','--enable-vpa',type=bool,help='enable VPA',default=ENABLE_VPA)
+    parser.add_argument('-enableduaupest','--enable-duaupest',type=bool,help='enable DUA upest',default=ENABLE_DUA_UPEST)
     parser.add_argument('-enableduaup','--enable-duaup',type=bool,help='enable DUA up',default=ENABLE_DUA_UP)
     parser.add_argument('-enableduamid','--enable-duamid',type=bool,help='enable DUA mid',default=ENABLE_DUA_MID)
     parser.add_argument('-enableduadown','--enable-duadown',type=bool,help='enable DUA down',default=ENABLE_DUA_DOWN)

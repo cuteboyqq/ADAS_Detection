@@ -14,7 +14,7 @@ class BaseDataset:
         self.enable_duaup = args.enable_duaup
         self.enable_duamid = args.enable_duamid
         self.enable_duadown = args.enable_duadown
-
+        self.enable_duaupest = args.enable_duaupest
 
         ## data directory
         self.save_dir = args.save_dir
@@ -45,12 +45,13 @@ class BaseDataset:
         self.dua_down_label = args.dua_downlabel
         self.dla_left_label = args.dla_leftlabel
         self.dla_right_label = args.dla_rightlabel
+        self.dua_upest_label = args.dua_upestlabel
         self.save_img = args.save_img
 
         ## parse image detail
         self.data_type = args.data_type
         self.data_num = args.data_num
-        self.wanted_label_list = [2,3,4]
+        self.wanted_label_list = [1,2,3,4,5,6,7]
         # 0: pedestrian
         # 1: rider
         # 2: car
@@ -122,6 +123,7 @@ class BaseDataset:
         
 
     def Get_Min_y_In_Drivable_Area(self,drivable_path):
+        min = 0
         if not os.path.exists(drivable_path):
             drivable_img = cv2.imread(drivable_path)
             return int(drivable_img.shape[0]/2.0)
@@ -132,6 +134,14 @@ class BaseDataset:
                 cv2.imshow("drivable",drivable_img)
                 cv2.waitKey(200)
             drivable_h,drivable_w = drivable_img.shape[0],drivable_img.shape[1]
+            # search_h = 0
+            # while(search_h<drivable_h):
+            #     for j in range(drivable_w):
+            #         if drivable_img[search_h][j][0]!=0:
+            #             find_small_y=True
+            #             min = search_h
+            #             break
+            #     search_h+=1
             # print(f"drivable_h:{drivable_h},drivable_w:{drivable_w}")
             p1_w =  int(drivable_w / 3.0)
             p2_w =  int(drivable_w / 2.0)
@@ -176,9 +186,10 @@ class BaseDataset:
                 # elif not all([p1y,p2y,p3y]):
                 #     min,index = self.find_max_value(p1y,p2y,p3y)
                 min=None
-                    
+            # if min==0:
+            #     min=None
             # print(f"min = {min}, index={index}")
-
+            # index = 99999
             return min,index
         
         
@@ -241,34 +252,47 @@ class BaseDataset:
             for line in lines:
                 find_min_area=False
                 #print(line)
-                la = line.split(" ")[0]
+                la = int(line.split(" ")[0])
                 x = int(float(line.split(" ")[1])*img_w)
                 y = int(float(line.split(" ")[2])*img_h)
                 w = int(float(line.split(" ")[3])*img_w)
                 h = int(float(line.split(" ")[4])*img_h)
                 #print(f"{la} {x} {y} {w} {h}")
-                if w*h < min_rea and int(la) in self.wanted_label_list:
-                    # print(f"w*h={w*h},min_rea={min_rea},x:{x},y:{y}")
-                    min_rea = w*h
-                    find_min_area=True
-                    # print(f"find_min_area :{find_min_area} ")
-                    
                 if min is not None:
-                    if int(la) in self.wanted_label_list and find_min_area:
-                        # print(f"y:{y} min:{min}")
+                    if w*h < min_rea and int(la) in self.wanted_label_list and h<min:
+                        # print(f"w*h={w*h},min_rea={min_rea},x:{x},y:{y}")
+                        min_rea = w*h
+                        find_min_area=True
                         min=y
                         min_x=x
                         min_w=w
                         min_h=h
+                    # print(f"find_min_area :{find_min_area} ")
                 else:
-                    if int(la) in self.wanted_label_list and find_min_area:
-                        # print(f"y:{y} min:{min}")
+                    if w*h < min_rea and int(la) in self.wanted_label_list:
+                        # print(f"w*h={w*h},min_rea={min_rea},x:{x},y:{y}")
+                        min_rea = w*h
+                        find_min_area=True
                         min=y
                         min_x=x
                         min_w=w
                         min_h=h
-        if min is None:
-            min = int(img_h/2.0)
+                # if min is not None:
+                #     if int(la) in self.wanted_label_list and find_min_area:
+                #         # print(f"y:{y} min:{min}")
+                #         min=y
+                #         min_x=x
+                #         min_w=w
+                #         min_h=h
+                # else:
+                #     if int(la) in self.wanted_label_list and find_min_area:
+                #         # print(f"y:{y} min:{min}")
+                #         min=y
+                #         min_x=x
+                #         min_w=w
+                #         min_h=h
+        # if min is None:
+        #     min = int(img_h/2.0)
         return (min,min_x,min_w,min_h)
         #return min,min_x,min_w,min_h
    
@@ -579,9 +603,14 @@ class BaseDataset:
             cv2.imshow("image",im)
             cv2.waitKey()
 
-        Final_Y = int(carhood / 2.0)
-        Final_W = range*2
-        Final_H = carhood
+        if carhood is not None:
+            Final_Y = int(carhood / 2.0)
+            Final_W = range*2
+            Final_H = carhood
+        else:
+            Final_Y = None
+            Final_W = None
+            Final_H = None
         return VP_X,Final_Y,Final_W,Final_H
 
     def Get_VP(self,p1,p2,p3,p4,cv_im):
@@ -601,7 +630,7 @@ class BaseDataset:
         '''
         if isinstance(p1[0],int) and isinstance(p2[0],int):
             # Get left line  y = L_a * x + L_b
-            if p1[0]-p2[0] != 0:
+            if p1[0]-p2[0] != 0 and p1[0] is not None and p1[1] is not None:
                 L_a = float((p1[1]-p2[1])/(p1[0]-p2[0]))
                 L_b = p1[1] - (L_a * p1[0])
             else:
@@ -612,7 +641,7 @@ class BaseDataset:
             return (None,None)
         if isinstance(p3[0],int) and isinstance(p4[0],int):
             # Get right line y = R_a * x + R_b
-            if p3[0]-p4[0]!=0:
+            if p3[0]-p4[0]!=0 and p3[0] is not None and p3[1] is not None:
                 R_a = float((p3[1]-p4[1])/(p3[0]-p4[0]))
                 R_b = p3[1] - (R_a * p3[0])
             else:
