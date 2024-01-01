@@ -18,5 +18,5 @@
 
   Result:
        ![image](https://github.com/cuteboyqq/ADAS_Detection/assets/58428559/24132b25-d8b2-4f85-beff-bba26456bdb2)
+       ![image](https://github.com/cuteboyqq/ADAS_Detection/assets/58428559/59d2180a-43d7-420c-9761-86d913a01f9b)
 
-      ![image](https://github.com/cuteboyqq/ADAS_Detection/assets/58428559/92b0020f-8cc3-475b-999a-9bc5e8f3719f)
