@@ -15,6 +15,9 @@ class BaseDataset:
         self.enable_duamid = args.enable_duamid
         self.enable_duadown = args.enable_duadown
         self.enable_duaupest = args.enable_duaupest
+        
+        ## DUA upest include sky or not
+        self.include_sky = args.include_sky
 
         ## data directory
         self.save_dir = args.save_dir

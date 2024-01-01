@@ -203,7 +203,10 @@ class MultiAreaTask(BaseDataset):
                     self.Draw_Rect(DUA_up,im,im_dri_cm,color=(0,127,255))
                  
                 if DUA_upest[0] is not None:
-                    self.Draw_Rect_Ver2(DUA_upest,im,im_dri_cm,color=(127,255,100))
+                    if self.include_sky:
+                        self.Draw_Rect_Ver2(DUA_upest,im,im_dri_cm,color=(127,50,255))
+                    else:
+                        self.Draw_Rect(DUA_upest,im,im_dri_cm,color=(127,50,255))
             
 
                 cv2.imshow("drivable image",im_dri_cm)
@@ -576,11 +579,13 @@ class MultiAreaTask(BaseDataset):
             '''
             if Final_Upest_Left_X is not None and Final_Upest_Right_X is not None \
                 and VL_Y is not None:
-                # Middle bounding box
-                DUA_Upest_X = int((Final_Upest_Left_X + Final_Upest_Right_X)/2.0)
-                DUA_Upest_Y = int(VL_Y)
-                DUA_Upest_W = abs(Final_Upest_Right_X - Final_Upest_Left_X)
-                DUA_Upest_H = abs(int(Search_Upest_line_H - VL_Y))*2.0
+                if self.include_sky:
+                    DUA_Upest_X = int((Final_Upest_Left_X + Final_Upest_Right_X)/2.0)
+                    DUA_Upest_Y = int(VL_Y)
+                    DUA_Upest_W = abs(Final_Upest_Right_X - Final_Upest_Left_X)
+                    DUA_Upest_H = abs(int(Search_Upest_line_H - VL_Y))*2.0
+                else:
+                    DUA_Upest_X,DUA_Upest_Y,DUA_Upest_W,DUA_Upest_H = self.x1x2y1y2_to_xywh(Final_Upest_Left_X,Final_Upest_Right_X,VL_Y,Search_Upest_line_H)
             else:
                 DUA_Upest_X = None
                 DUA_Upest_Y = None
@@ -653,7 +658,7 @@ class MultiAreaTask(BaseDataset):
 
             ## DUA xywh
             DUA_up_xywh = (DUA_Up_X,DUA_Up_Y,DUA_Up_W,DUA_Up_H)
-            DUA_mid_xywh = (DUA_Mid_X,DUA_Mid_Y,DUA_Up_W,DUA_Up_H)
+            DUA_mid_xywh = (DUA_Mid_X,DUA_Mid_Y,DUA_Mid_W,DUA_Mid_H)
             DUA_down_xywh = (DUA_Down_X,DUA_Down_Y,DUA_Down_W,DUA_Down_H)
             DUA_upest_xywh = (DUA_Upest_X,DUA_Upest_Y,DUA_Upest_W,DUA_Upest_H)
             VLA_xywh = (VLA_X,VLA_Y,VLA_W,VLA_H)

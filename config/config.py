@@ -8,9 +8,9 @@ SHOW_IMAGE = False
 SAVE_IMAGE = False
 DATA_NUM = 70000
 DATA_TYPE = "train"
-IMG_DIR = r"C:/datasets/bdd100k_data_0.9_zip/images/100k/train"
+IMG_DIR = r"C:/datasets/bdd100k_data_0.9/images/100k/train"
 SAVE_TXT_DIR = "/home/ali/Projects/datasets/BDD100K_0.9_Train_VLA_DCA_VPA_DUA3_label_Txt_2023-12-29-Test-------------------------"
-DATA_DIR = r"C:/datasets/bdd100k_data_0.9_zip"
+DATA_DIR = r"C:/datasets/bdd100k_data_0.9"
 VLA_LABEL = 12
 DCA_LABEL = 13
 VPA_LABEL = 14
@@ -34,7 +34,7 @@ DCA_SAVE_TXT_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.8/labels/detectio
 VPA_SAVE_TXT_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.8/labels/detection-VLA-DCA-DUA3-VPA/val"
 DUA_SAVE_TXT_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.8/labels/detection-VLA-DCA-VPA-DUA/val"
 '''2023-12-29 parsing step 1'''
-MA_SAVE_TXT_DIR = r"C:/datasets/bdd100k_data_0.9/labels/detection-VLA-DCA-VPA-DUA4/train"
+MA_SAVE_TXT_DIR = r"C:/datasets/bdd100k_data_0.9/labels/detection-VLA-DCA-VPA-DUA4-include-sky/train"
 
 ## =================MA Multi Area Task=========================================================================================
 ENABLE_VLA = True
@@ -44,6 +44,9 @@ ENABLE_DUA_UPEST = True
 ENABLE_DUA_UP = True
 ENABLE_DUA_MID = True
 ENABLE_DUA_DOWN = True
+
+# Just for DUA upest currently (2024-01-01)
+INCLUDE_SKY = True
 
 '''
     VLA parameters
@@ -84,6 +87,8 @@ def get_VLA_args():
     parser.add_argument('-enableduaup','--enable-duaup',type=bool,help='enable DUA up',default=ENABLE_DUA_UP)
     parser.add_argument('-enableduamid','--enable-duamid',type=bool,help='enable DUA mid',default=ENABLE_DUA_MID)
     parser.add_argument('-enableduadown','--enable-duadown',type=bool,help='enable DUA down',default=ENABLE_DUA_DOWN)
+
+    parser.add_argument('-includesky','--include-sky',type=bool,help='include sky',default=INCLUDE_SKY)
     ## ========================================================================================================
     parser.add_argument('-showim','--show-im',type=bool,help='show images',default=SHOW_IMAGE)
     parser.add_argument('-showimcrop','--show-imcrop',type=bool,help='show crop images',default=True)
@@ -140,6 +145,7 @@ def get_DCA_args():
     parser.add_argument('-enableduaupest','--enable-duaupest',type=bool,help='enable DUA upest',default=ENABLE_DUA_UPEST)
     parser.add_argument('-enableduamid','--enable-duamid',type=bool,help='enable DUA mid',default=ENABLE_DUA_MID)
     parser.add_argument('-enableduadown','--enable-duadown',type=bool,help='enable DUA down',default=ENABLE_DUA_DOWN)
+    parser.add_argument('-includesky','--include-sky',type=bool,help='include sky',default=INCLUDE_SKY)
     ## ========================================================================================================
 
 
@@ -198,6 +204,7 @@ def get_VPA_args():
     parser.add_argument('-enableduaup','--enable-duaup',type=bool,help='enable DUA up',default=ENABLE_DUA_UP)
     parser.add_argument('-enableduamid','--enable-duamid',type=bool,help='enable DUA mid',default=ENABLE_DUA_MID)
     parser.add_argument('-enableduadown','--enable-duadown',type=bool,help='enable DUA down',default=ENABLE_DUA_DOWN)
+    parser.add_argument('-includesky','--include-sky',type=bool,help='include sky',default=INCLUDE_SKY)
     ## ========================================================================================================
 
 
@@ -254,6 +261,7 @@ def get_DUA_args():
     parser.add_argument('-enableduaup','--enable-duaup',type=bool,help='enable DUA up',default=ENABLE_DUA_UP)
     parser.add_argument('-enableduamid','--enable-duamid',type=bool,help='enable DUA mid',default=ENABLE_DUA_MID)
     parser.add_argument('-enableduadown','--enable-duadown',type=bool,help='enable DUA down',default=ENABLE_DUA_DOWN)
+    parser.add_argument('-includesky','--include-sky',type=bool,help='include sky',default=INCLUDE_SKY)
     ## ========================================================================================================
 
 
@@ -311,6 +319,7 @@ def get_DLA_args():
     parser.add_argument('-enableduaup','--enable-duaup',type=bool,help='enable DUA up',default=ENABLE_DUA_UP)
     parser.add_argument('-enableduamid','--enable-duamid',type=bool,help='enable DUA mid',default=ENABLE_DUA_MID)
     parser.add_argument('-enableduadown','--enable-duadown',type=bool,help='enable DUA down',default=ENABLE_DUA_DOWN)
+    parser.add_argument('-includesky','--include-sky',type=bool,help='include sky',default=INCLUDE_SKY)
     ## ========================================================================================================
 
     parser.add_argument('-showim','--show-im',type=bool,help='show images',default=SHOW_IMAGE)
@@ -368,6 +377,7 @@ def get_MA_args():
     parser.add_argument('-enableduaup','--enable-duaup',type=bool,help='enable DUA up',default=ENABLE_DUA_UP)
     parser.add_argument('-enableduamid','--enable-duamid',type=bool,help='enable DUA mid',default=ENABLE_DUA_MID)
     parser.add_argument('-enableduadown','--enable-duadown',type=bool,help='enable DUA down',default=ENABLE_DUA_DOWN)
+    parser.add_argument('-includesky','--include-sky',type=bool,help='include sky',default=INCLUDE_SKY)
     ## ========================================================================================================
 
     parser.add_argument('-showim','--show-im',type=bool,help='show images',default=SHOW_IMAGE)
