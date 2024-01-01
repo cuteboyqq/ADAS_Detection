@@ -5,6 +5,10 @@
     1. Vanish Line Area (VLA)
     2. Drivable Center Area (DCA)
     3. Vanish Point Area (VPA)
+    4. Drivable Upper Area Upest (DUA Upest)
+    5. Drivable Upper Area Up (DUA Up)
+    6. Drivable Upper Area Middle (DUA Mid)
+    7. Drivable Upper Area Down (DUA Down)   
   Purpose :
 
        1. able to detection lane line using DCA & VPA
