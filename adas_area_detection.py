@@ -1,13 +1,15 @@
 import glob
 import os
 import shutil
-from config.config import get_VLA_args, get_DCA_args, get_VPA_args, get_DUA_args, get_DLA_args,get_MA_args
+from config.config import get_VLA_args, get_DCA_args, get_VPA_args, \
+    get_DUA_args, get_DLA_args,get_MA_args, get_CRA_args
 import cv2
 from tasks.VPA import VPA
 from tasks.VLA import VLA
 from tasks.DCA import DCA
 from tasks.DUA import DUA
 from tasks.DLA import DLA
+from tasks.CRA import CRA
 from tasks.MA import MultiAreaTask
 from engine.dataset import BaseDataset
 
@@ -19,7 +21,8 @@ if __name__=="__main__":
     Get_VPA = False
     Get_DUA  = False
     Get_DLA = False
-    Get_MA = True
+    Get_MA = False
+    Get_CRA = True
     if Get_VLA:
         args_vla = get_VLA_args()
         vla = VLA(args_vla)
@@ -51,5 +54,10 @@ if __name__=="__main__":
         args_vpa = get_VPA_args()
         vpa = VPA(args_vpa)
         vpa.Get_VPA_Yolo_Txt_Labels()
+    
+    if Get_CRA:
+        args_cra = get_CRA_args()
+        cra = CRA(args_cra)
+        cra.Get_CRA_Yolo_Txt_Labels()
 
 
