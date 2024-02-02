@@ -6,11 +6,11 @@ import cv2
 ## =======Set parameters for all get_XXX_args()==================================================
 SHOW_IMAGE = False
 SAVE_IMAGE = False
-DATA_NUM = 10000
-DATA_TYPE = "val"
-IMG_DIR = r"C:\datasets\bdd100k_data_9\images\100k\val"
-SAVE_TXT_DIR = r"C:\datasets/BDD100K_9_Train_CRA_TEST-------------------------"
-DATA_DIR = r"C:\datasets\bdd100k_data_9"
+DATA_NUM = 70000
+DATA_TYPE = "train"
+IMG_DIR = r"/home/ali/Projects/datasets/bdd100k_data_0.8/images/train"
+SAVE_TXT_DIR = "/home/ali/Projects/datasets/BDD100K_0.8_train_CRA-Train-2024-02-02-------------------------"
+DATA_DIR = r"/home/ali/Projects/datasets/bdd100k_data_0.8"
 VLA_LABEL = 12
 DCA_LABEL = 13
 VPA_LABEL = 14
@@ -23,7 +23,7 @@ DLA_RIGHT_LABEL = 20
 CRA_LABEL = 18
 CRA_PARSE_DET_FOLDER = "detection"
 ## ===============Parsing detection folder================================================================================
-DCA_PARSE_DET_FOLDER  = "detection"
+DCA_PARSE_DET_FOLDER  = "detection-VLA"
 '''2023-12-29 parsing step 2'''
 VPA_PARSE_DET_FOLDER  = "detection-VLA-DCA-DUA3"
 DUA_PARSE_DET_FOLDER  = "detection-VLA-DCA-VPA"
@@ -35,14 +35,14 @@ DCA_SAVE_TXT_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.8/labels/detectio
 '''2023-12-29 parsing step 2'''
 VPA_SAVE_TXT_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.8/labels/detection-VLA-DCA-DUA3-VPA/val"
 DUA_SAVE_TXT_DIR = "/home/ali/Projects/datasets/bdd100k_data_0.8/labels/detection-VLA-DCA-VPA-DUA/val"
-'''2023-12-29 parsing step 1'''
-MA_SAVE_TXT_DIR = r"C:/datasets/bdd100k_data_0.9/labels/detection-VLA-DCA-VPA-DUA4-include-sky/val"
+'''2024-01-05 parsing step 1'''
+MA_SAVE_TXT_DIR = r"/home/ali/Projects/datasets/bdd100k_data_0.8/labels/detection-VLA-DCA-VPA-DUA3-2024-01-05/val"
 
 ## =================MA Multi Area Task=========================================================================================
 ENABLE_VLA = True
 ENABLE_DCA = True
 ENABLE_VPA = True
-ENABLE_DUA_UPEST = True
+ENABLE_DUA_UPEST = False
 ENABLE_DUA_UP = True
 ENABLE_DUA_MID = True
 ENABLE_DUA_DOWN = True
@@ -462,6 +462,3 @@ def get_CRA_args():
     parser.add_argument('-splitheight','--split-height',type=int,help='split image height',default=80)
     parser.add_argument('-dataset','--dataset',help='dataset directory',default="/home/ali/Projects/datasets/CULane/driver_161_90frame_crop_2cls/train")
     return parser.parse_args()
-
-
-
