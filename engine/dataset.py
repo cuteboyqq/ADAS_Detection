@@ -49,6 +49,7 @@ class BaseDataset:
         self.dla_left_label = args.dla_leftlabel
         self.dla_right_label = args.dla_rightlabel
         self.dua_upest_label = args.dua_upestlabel
+        self.cra_label = args.cra_label
         self.save_img = args.save_img
 
         ## parse image detail
