@@ -8,7 +8,8 @@
     4. Drivable Upper Area Upest (DUA Upest)
     5. Drivable Upper Area Up (DUA Up)
     6. Drivable Upper Area Middle (DUA Mid)
-    7. Drivable Upper Area Down (DUA Down)   
+    7. Drivable Upper Area Down (DUA Down)
+    8. Cross Road Area (CRA)
   Purpose :
 
        1. able to detection lane line using DCA & VPA
