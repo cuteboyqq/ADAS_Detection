@@ -46,18 +46,31 @@ class CRA_Ver2(BaseDataset):
             # print(f"{i}:{im_path}")
            
             x1y1wh_list,im_h,im_w = self.Get_CRA_XYWH(im_path_list[i],return_type=1)
-         
+            print(f"im_h:{im_h}, im_w:{im_w}")
             # x,y = xywh[0],xywh[1]
-         
-            success = self.Add_CRA_Yolo_Txt_Label(x1y1wh_list,detection_path,im_h,im_w,im_path_list[i])
+            xywh_list = self.x1y1wh2xywh(x1y1wh_list)
 
-    
+            success = self.Add_CRA_Yolo_Txt_Label(xywh_list,detection_path,im_h,im_w,im_path_list[i])
 
-    def Add_CRA_Yolo_Txt_Label(self,x1y1wh_list,detection_path,h,w,im_path):
+    def x1y1wh2xywh(self, x1y1wh_list):
+        xywh_list = []
+        for i in range(len(x1y1wh_list)):
+            x1 = x1y1wh_list[i][0]
+            y1 = x1y1wh_list[i][1]
+            w  = x1y1wh_list[i][2]
+            h  = x1y1wh_list[i][3]
+            x = x1 + int(w/2.0)
+            y = y1 + int(h/2.0)
+            xywh_list.append((x,y,w,h))
+        
+        return xywh_list
+
+
+    def Add_CRA_Yolo_Txt_Label(self,xywh_list,detection_path,im_h,im_w,im_path):
         success = 0
         xywh_list_not_None = True
         CRA_lxywh_list = []
-        if len(x1y1wh_list)>0:
+        if len(xywh_list)>0:
             xywh_list_not_None = True
         else:
             xywh_list_not_None = False
@@ -84,25 +97,29 @@ class CRA_Ver2(BaseDataset):
                 shutil.copy(im_path,self.save_txtdir)
 
             if xywh_list_not_None == True:
-                for i in range(len(x1y1wh_list)):
-                    x = float((int(float(x1y1wh_list[0]/w)*1000000))/1000000)
-                    y = float((int(float(x1y1wh_list[1]/h)*1000000))/1000000)
-                    w = float((int(float(x1y1wh_list[2]/w)*1000000))/1000000)
-                    h = float((int(float(x1y1wh_list[3]/h)*1000000))/1000000)
+                for i in range(len(xywh_list)):
+                    x = float((int(float(xywh_list[i][0]/im_w)*1000000))/1000000)
+                    y = float((int(float(xywh_list[i][1]/im_h)*1000000))/1000000)
+                    w = float((int(float(xywh_list[i][2]/im_w)*1000000))/1000000)
+                    h = float((int(float(xywh_list[i][3]/im_h)*1000000))/1000000)
+
+                    
                     la = self.cra_label
                     # print(f"la = {la}")
                     CRA_lxywh = str(la) + " " \
                                 +str(x) + " " \
                                 +str(y) + " " \
                                 + str(w) + " " \
-                                + str(h) 
-                    CRA_lxywh_list.append([CRA_lxywh])
+                                + str(h)
+                    
+                    if x<1 and y<1 and w<1 and h<1:
+                        CRA_lxywh_list.append([CRA_lxywh])
 
             if len(CRA_lxywh_list)>0 :
                 # Add DCA label into Yolo label.txt
                 with open(save_label_path,'a') as f:
                     for i in range(len(CRA_lxywh_list)):
-                        f.write(CRA_lxywh_list[i])
+                        f.write(CRA_lxywh_list[i][0])
                         f.write("\n")
 
             # print(f"{la}:{x}:{y}:{w}:{h}")
