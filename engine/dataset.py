@@ -72,14 +72,16 @@ class BaseDataset:
         self.show_im = args.show_im
 
         #show resize image
-        self.resize = False
+       
 
 
         # CRA ver2 parameters
         self.CRA_xywh_list = []
-        self.CRA_horizontal_list = []
-        self.CRA_vertical_list = []
-        self.CRA_unknown_list = []
+        self.CRA_horizontal_x1y1wh_list = []
+        self.CRA_vertical_x1y1wh_list = []
+        self.CRA_unknown_x1y1wh_list = []
+        self.CRA_total_x1y1wh_list = []
+        self.CRA_merged_x1y1wh_list = []
         self.contour = None
         self.im = None
         self.im_lane = None
@@ -93,6 +95,13 @@ class BaseDataset:
         self.contour_area_th = 160
         self.parse_stride_w = 2
         self.parse_stride_h = 1
+        self.CRA_mask = None
+        self.erode_dilate = True
+        self.dilate_iter = 10
+        self.erode_iter = 4
+        self.resize = True
+        self.rect_width = 3
+        self.carhoody = 0
 
     def parse_path(self,path,type="val"):
         file = path.split(os.sep)[-1]
@@ -905,4 +914,22 @@ class BaseDataset:
                     self.im_lane_copy[i][j][:] = 255
                 else:
                     self.im_lane_copy[i][j][:] = 0
+
+
+    def Get_carhood_y(self, im_path):
+        drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path,type=self.data_type,detect_folder=self.det_folder)
+        dri_map = {"MainLane": 0, "AlterLane": 1, "BackGround":2}
+        Lowest_H = 0
+        if os.path.exists(drivable_mask_path):
+            im_dri = cv2.imread(drivable_mask_path)
+            im = cv2.imread(im_path)
+            im_h,im_w = im.shape[0],im.shape[1]
+            for i in range(im_h):
+                j = int(im_w/2.0)
+                if im_dri[i][j][0]==dri_map["MainLane"]:
+                    if i>Lowest_H:
+                        Lowest_H = i
+
+        
+        return Lowest_H
 
