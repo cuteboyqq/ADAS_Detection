@@ -37,20 +37,24 @@ class CRA_Ver2(BaseDataset):
         for i in range(final_wanted_img_count):
             self.init()
             self.carhoody = self.Get_carhood_y(im_path_list[i])
-            print(f"self.carhoody : {self.carhoody}")
             drivable_path,drivable_mask_path,lane_path,detection_path = self.parse_path_ver2(im_path_list[i],type=self.data_type,detect_folder=self.det_folder)
             print(f"{i}:{im_path_list[i]}")
             im = cv2.imread(im_path_list[i])
-            h,w = im.shape[0],im.shape[1]
-            # print(f"detection_path = {detection_path}")
-            # print(f"{i}:{im_path}")
-           
+            h,w = im.shape[0],im.shape[1]  
             x1y1wh_list,im_h,im_w = self.Get_CRA_XYWH(im_path_list[i],return_type=1)
-            print(f"im_h:{im_h}, im_w:{im_w}")
             # x,y = xywh[0],xywh[1]
             xywh_list = self.x1y1wh2xywh(x1y1wh_list)
 
             success = self.Add_CRA_Yolo_Txt_Label(xywh_list,detection_path,im_h,im_w,im_path_list[i])
+
+
+
+
+
+
+
+
+
 
     def x1y1wh2xywh(self, x1y1wh_list):
         xywh_list = []
@@ -158,7 +162,6 @@ class CRA_Ver2(BaseDataset):
             self.get_particular_label_map(R=86,G=94,B=219) 
             # Find contour in CRA map
             self.get_contour(self.im_lane_copy)  
-            print("Number of Contours found = " + str(len(self.contours)))
             # Get contour x1y1wh
             self.get_CRA_contour_x1y1wh_list(draw_im=False)
             # Get merged x1y1wh
