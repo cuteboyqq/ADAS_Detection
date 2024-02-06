@@ -4,12 +4,12 @@ import shutil
 import cv2
 
 ## =======Set parameters for all get_XXX_args()==================================================
-SHOW_IMAGE = False
+SHOW_IMAGE = True
 SAVE_IMAGE = False
 DATA_NUM = 10000
 DATA_TYPE = "val"
 IMG_DIR = r"/home/ali/Projects/datasets/bdd100k_data_0.8/images/val"
-SAVE_TXT_DIR = "/home/ali/Projects/datasets/BDD100K_0.8_train_CRA-Val-2024-02-05-------------------------"
+SAVE_TXT_DIR = "/home/ali/Projects/datasets/BDD100K_0.8_train_CRA-Val-2024-02-05-VER2-------------------------"
 DATA_DIR = r"/home/ali/Projects/datasets/bdd100k_data_0.8"
 VLA_LABEL = 12
 DCA_LABEL = 13
