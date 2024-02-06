@@ -71,6 +71,29 @@ class BaseDataset:
         self.show_imcrop = args.show_imcrop
         self.show_im = args.show_im
 
+        #show resize image
+        self.resize = False
+
+
+        # CRA ver2 parameters
+        self.CRA_xywh_list = []
+        self.CRA_horizontal_list = []
+        self.CRA_vertical_list = []
+        self.CRA_unknown_list = []
+        self.contour = None
+        self.im = None
+        self.im_lane = None
+        self.edge = None
+        self.im_lane_copy = None
+        self.im_h = None
+        self.im_w = None
+        self.horizontal_contour = []
+        self.vertical_contour = []
+        self.unknown_contour = []
+        self.contour_area_th = 160
+        self.parse_stride_w = 2
+        self.parse_stride_h = 1
+
     def parse_path(self,path,type="val"):
         file = path.split(os.sep)[-1]
         file_name = file.split(".")[0]
@@ -860,3 +883,26 @@ class BaseDataset:
             return (Middle_X,Middle_Y,DCA_W,DCA_H),h,w
         elif return_type==2:
             return (Left_X,Right_X,Search_line_H)
+    
+    # CRA ver2 need this function
+    def get_contour(self, image):
+        '''
+        Purpose : Get image contour
+        '''
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)         
+        edge = cv2.Canny(gray, 30, 200) 
+        edge_copy = edge.copy()
+        self.contours, hierarchy = cv2.findContours(edge_copy,cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    
+    def get_particular_label_map(self,R=0,G=0,B=0):
+        '''
+        Purpose : Get CRA label colormap
+        '''
+        # Cost time O(n^2) : vary slow....
+        for i in range(0,int(self.im_h),self.parse_stride_h):
+            for j in range(0,int(self.im_w),self.parse_stride_w):
+                if self.im_lane[i][j][0] == R and self.im_lane[i][j][1] == G and self.im_lane[i][j][2] == B:
+                    self.im_lane_copy[i][j][:] = 255
+                else:
+                    self.im_lane_copy[i][j][:] = 0
+
